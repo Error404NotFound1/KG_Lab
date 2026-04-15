@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+models/
+.env
+知识图谱构建数据集/*.pdf
+*.pdf 

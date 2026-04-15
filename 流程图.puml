@@ -1,0 +1,55 @@
+@startuml
+title 知识图谱大作业流程（模块化）
+skinparam packageStyle rectangle
+
+start
+
+:定义目标与范围;
+:设计本体与标注规范;
+
+partition "数据获取与预处理" {
+  :收集文献 (PDF / OCR);
+  :文本抽取与清洗;
+  :句子切分与分词;
+}
+
+partition "术语提取与词表" {
+  :术语抽取 (TF-IDF / RAKE / C-value / PMI);
+  :构建 alias / 领域词表;
+}
+
+partition "自动候选抽取" {
+  :规则字典匹配 (高召回);
+  :NER (规则 + Transformer 微调);
+  :关系抽取 (依存规则 + 分类模型);
+  :远程监督 / 多实例学习 (样本扩增与降噪);
+}
+
+partition "标注与质检" {
+  :doccano / label-studio 标注;
+  :互检与一致性统计;
+  :合并人工标注与自动候选;
+}
+
+partition "KG 构建与存储" {
+  :实体消歧与合并;
+  :导出 TTL / JSON-LD;
+  :导入 Neo4j 并可视化 (networkx / pyvis / Bloom);
+}
+
+partition "评估与交付" {
+  :计算 Precision / Recall / F1;
+  :撰写技术报告 (40 分要点);
+  :打包源代码并录制 4-5 分钟演示视频;
+}
+
+stop
+
+note right
+模块说明（可并行执行的阶段）:
+- 数据处理与术语表构建为后续抽取提供基础。
+- 自动候选抽取与人工标注并行以节省时间。
+- 远程监督用于扩增训练样本，但需采取降噪策略。
+end note
+
+@enduml

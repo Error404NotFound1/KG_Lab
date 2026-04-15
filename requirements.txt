@@ -1,0 +1,40 @@
+# Minimal requirements for KG pipeline
+# (Python 3.10+ should be provided by the environment; do not list it for pip)
+torch>=2.0
+transformers>=4.30
+datasets>=2.0
+tokenizers
+sentencepiece
+pandas
+numpy
+scikit-learn
+seqeval
+tqdm
+spacy
+jieba
+# pkuseg  # removed: builds problematic on macOS/arm64. Install manually if needed.
+nltk
+pdfplumber
+tika
+pytesseract
+Pillow
+rdflib
+neo4j
+py2neo
+networkx
+pyvis
+matplotlib
+fastapi
+uvicorn
+python-dotenv
+
+# Dev / optional
+jupyterlab
+black
+isort
+pre-commit
+pytest
+
+PyMuPDF
+rapidocr-onnxruntime
+pdfminer.six
