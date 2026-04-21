@@ -3,19 +3,37 @@ import jieba
 
 def clean_text(text: str) -> str:
     """清理文本：统一换行、去除多余空白、合并断行"""
+    if not text:
+        return ""
+
     # 统一换行
     text = text.replace('\r\n', '\n')
-    # 合并断行：如果行尾跟着中文，且没有标点符号，或者带有连字符（英文），可以去除换行符，但这里提供一个简单的通用版本
-    # 这里我们只做最基础的清洗：把多个空行合并，并去掉首尾多余空格
+    text = text.replace('\r', '\n')
+    text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', text)
+    text = text.replace('\u00a0', ' ')
+
     lines = text.split('\n')
-    cleaned_lines = [line.strip() for line in lines if line.strip()]
+    cleaned_lines = []
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        if re.fullmatch(r'\d{1,4}', line):
+            continue
+        if len(line) >= 12 and len(set(line)) <= 3:
+            continue
+        line = re.sub(r'[ \t\f\v]+', ' ', line)
+        cleaned_lines.append(line)
     return '\n'.join(cleaned_lines)
 
 def split_sentences(text: str) -> list[str]:
     """句子切分"""
-    # 基于常见标点符号进行切分
-    # 替换句号、感叹号、问号为自身+换行符，以保留标点
-    text = re.sub(r'([。！？!?])', r'\1\n', text)
+    if not text:
+        return []
+
+    # 基于常见标点符号进行切分，并兼容中文文献常见的分号、冒号和换行断句
+    text = re.sub(r'([。！？!?；;])', r'\1\n', text)
+    text = re.sub(r'\n+', '\n', text)
     sentences = text.split('\n')
     return [s.strip() for s in sentences if s.strip()]
 

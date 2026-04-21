@@ -6,11 +6,11 @@
 
 ```bash
 cd code
-python -m venv .venv
-source .venv/bin/activate
 pip install -r requirements.txt
 python scripts/run_pipeline.py --stage preprocess
 ```
+
+OCR 默认通过根目录的 [config.json](config.json) 调用 OpenAI 兼容视觉模型。你只需要把里面的 `api_key`、`base_url` 和 `model` 改成自己的配置即可。
 
 主要子目录与职责
 

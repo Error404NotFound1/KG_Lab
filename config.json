@@ -1,0 +1,14 @@
+{
+  "ocr": {
+    "api_key": "sk-ncDpv1SqSbWaryblvU9suBOhrh6iWjDVOs6dbsymlAEbII1Y",
+    "base_url": "https://yunwu.ai/v1",
+    "model": "gpt-5.4-nano",
+    "timeout": 120,
+    "max_tokens": 4096,
+    "temperature": 0,
+    "detail": "high",
+    "render_zoom": 1.5,
+    "system_prompt": "你是一个高精度 OCR 引擎。只输出图片中可见的正文文字，尽量保留原始换行、标点和段落结构，不要解释，不要总结，不要输出多余内容。",
+    "user_prompt": "请准确识别这页图片中的正文文字，只输出可见文本，保持原文顺序。"
+  }
+}
