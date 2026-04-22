@@ -1,28 +1,781 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>变构飞行器知识图谱应用</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 40px; background: #f7f9fc; color: #222; }
-    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-    h1 { margin-top: 0; }
-    ul { line-height: 1.8; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>变构飞行器知识图谱</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <style>
+        :root {
+            --bg-dark: #0a0e17;
+            --glass-bg: rgba(16, 22, 38, 0.6);
+            --glass-border: rgba(0, 212, 255, 0.2);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent: #00d4ff;
+            --accent-glow: 0 0 15px rgba(0, 212, 255, 0.5);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow: hidden; /* Prevent body scroll, layout handles it */
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            top: 0;
+            left: 0;
+        }
+
+        /* Header */
+        header {
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(to bottom, rgba(10, 14, 23, 0.9), transparent);
+            z-index: 10;
+        }
+
+        .logo {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            text-shadow: var(--accent-glow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo::before {
+            content: '';
+            display: block;
+            width: 24px;
+            height: 24px;
+            background: radial-gradient(circle, var(--accent) 20%, transparent 80%);
+            border-radius: 50%;
+            box-shadow: var(--accent-glow);
+        }
+
+        .search-bar {
+            position: relative;
+            width: 300px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.5rem;
+            border-radius: 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            outline: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+        
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            background: rgba(10, 14, 23, 0.95);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            margin-top: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            backdrop-filter: blur(10px);
+            display: none;
+            z-index: 100;
+        }
+        
+        .search-results.active {
+            display: block;
+        }
+        
+        .search-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .search-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+        }
+        
+        .search-item .type-badge {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* Layout */
+        .container {
+            display: flex;
+            flex: 1;
+            padding: 0 2rem 2rem 2rem;
+            gap: 2rem;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 1.5rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Left Panel - Stats & Filters */
+        .left-panel {
+            flex: 0 0 300px;
+            overflow-y: auto;
+        }
+        
+        /* Hide scrollbar */
+        .left-panel::-webkit-scrollbar, .right-panel::-webkit-scrollbar {
+            width: 4px;
+        }
+        .left-panel::-webkit-scrollbar-thumb, .right-panel::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 0.5rem;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(0, 212, 255, 0.3);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(90deg, #fff, var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .legend-list {
+            list-style: none;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 5px currentColor;
+        }
+
+        .legend-count {
+            margin-left: auto;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            background: rgba(255,255,255,0.05);
+            padding: 2px 6px;
+            border-radius: 10px;
+        }
+
+        /* Center Panel - Main Graph */
+        .center-panel {
+            flex: 1;
+            position: relative;
+            padding: 0; /* Let canvas fill */
+            overflow: hidden;
+        }
+
+        #graph-container {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .graph-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(10, 14, 23, 0.7);
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(5px);
+        }
+        
+        .control-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .control-btn:hover, .control-btn.active {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: var(--accent);
+        }
+
+        /* Right Panel - Details */
+        .right-panel {
+            flex: 0 0 350px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(0);
+            transition: transform 0.3s ease;
+        }
+        
+        .right-panel.hidden {
+            display: none;
+        }
+        
+        #entity-detail-content {
+            flex: 1;
+        }
+
+        .detail-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .entity-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .entity-type {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .detail-section h4 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .relation-list {
+            list-style: none;
+        }
+
+        .relation-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 2px solid var(--accent);
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .relation-item:hover {
+            background: rgba(255,255,255,0.08);
+        }
+
+        .rel-label {
+            color: var(--accent);
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+            display: inline-block;
+        }
+        
+        .evidence-text {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            font-style: italic;
+            border-top: 1px dashed rgba(255,255,255,0.1);
+            padding-top: 6px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .source-doc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            word-break: break-all;
+        }
+        
+        /* Loading Overlay */
+        #loading {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(10, 14, 23, 0.8);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--accent);
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-  <div class="card">
-    <h1>变构飞行器知识图谱应用</h1>
-    <p>这是一个课程大作业应用骨架，当前已经接入图谱统计接口。</p>
-  </div>
-  <div class="card">
-    <h2>图谱统计</h2>
-    <ul>
-      <li>实体数：{{ stats.entities }}</li>
-      <li>关系数：{{ stats.relations }}</li>
-      <li>实体类型分布：{{ stats.entity_type_distribution }}</li>
-    </ul>
-  </div>
+    <div id="particles-js"></div>
+
+    <header>
+        <div class="logo">KG_LAB <span style="font-size: 0.8rem; color: var(--text-muted); font-family: 'Inter', sans-serif; font-weight: normal; text-shadow: none; margin-left: 10px;">变构飞行器图谱系统</span></div>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="搜索实体 (如: 机翼, MPC)...">
+            <div class="search-results" id="searchResults"></div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Left Panel: Stats -->
+        <div class="glass-panel left-panel">
+            <h2 class="panel-title">系统概览</h2>
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-entities">0</div>
+                    <div class="stat-label">知识节点</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-relations">0</div>
+                    <div class="stat-label">知识关系</div>
+                </div>
+            </div>
+
+            <h2 class="panel-title">实体分布</h2>
+            <ul class="legend-list" id="legendList">
+                <!-- Injected via JS -->
+            </ul>
+            
+            <div style="margin-top: 2rem;">
+                <h2 class="panel-title">控制面板</h2>
+                <div style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6;">
+                    <p>• 滚动鼠标滚轮缩放图谱</p>
+                    <p>• 拖拽空白处平移视图</p>
+                    <p>• 点击节点查看详细属性与关系</p>
+                    <p>• 搜索框支持关键字快速定位</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel: Graph -->
+        <div class="glass-panel center-panel">
+            <div id="graph-container"></div>
+            <div class="graph-controls">
+                <button class="control-btn active" onclick="loadGlobalGraph()">全局视图</button>
+                <button class="control-btn" id="subgraphBtn" style="display: none;">局部视图</button>
+            </div>
+        </div>
+
+        <!-- Right Panel: Details -->
+        <div class="glass-panel right-panel" id="rightPanel">
+            <h2 class="panel-title">实体画像</h2>
+            <div id="entity-detail-content">
+                <div style="color: var(--text-muted); text-align: center; margin-top: 50px;">
+                    点击图中节点查看详情
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="loading"><div class="spinner"></div></div>
+
+    <script>
+        // Initialize Particles.js
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#00d4ff" },
+                shape: { type: "circle" },
+                opacity: { value: 0.3, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: "#00d4ff", opacity: 0.1, width: 1 },
+                move: { enable: true, speed: 1, direction: "none", random: true, straight: false, out_mode: "out", bounce: false }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" }, resize: true },
+                modes: { grab: { distance: 140, line_linked: { opacity: 0.5 } }, push: { particles_nb: 3 } }
+            },
+            retina_detect: true
+        });
+
+        // App State
+        let chartInstance = null;
+        let typeColors = {};
+        let currentMode = 'global'; // 'global' or 'local'
+
+        // Initialize ECharts
+        function initChart() {
+            const chartDom = document.getElementById('graph-container');
+            chartInstance = echarts.init(chartDom, 'dark');
+            
+            // Handle window resize
+            window.addEventListener('resize', () => chartInstance.resize());
+            
+            // Node click event
+            chartInstance.on('click', function (params) {
+                if (params.dataType === 'node') {
+                    loadEntityDetail(params.data.id);
+                    // Also switch to subgraph view if we are in global
+                    loadSubgraph(params.data.id);
+                }
+            });
+        }
+
+        function showLoading() { document.getElementById('loading').style.display = 'flex'; }
+        function hideLoading() { document.getElementById('loading').style.display = 'none'; }
+
+        // Fetch Stats
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const data = await res.json();
+                
+                document.getElementById('stat-entities').innerText = data.entities.toLocaleString();
+                document.getElementById('stat-relations').innerText = data.relations.toLocaleString();
+                
+                typeColors = data.type_colors;
+                
+                const legendList = document.getElementById('legendList');
+                legendList.innerHTML = '';
+                
+                // Sort types by count
+                const sortedTypes = Object.entries(data.entity_type_distribution)
+                    .sort((a, b) => b[1] - a[1]);
+                    
+                sortedTypes.forEach(([type, count]) => {
+                    const color = typeColors[type] || '#fff';
+                    const li = document.createElement('li');
+                    li.className = 'legend-item';
+                    li.innerHTML = `
+                        <div class="legend-color" style="background-color: ${color}; color: ${color}"></div>
+                        <span>${type}</span>
+                        <span class="legend-count">${count}</span>
+                    `;
+                    legendList.appendChild(li);
+                });
+            } catch (e) {
+                console.error("Failed to load stats", e);
+            }
+        }
+
+        // Render Graph
+        function renderGraph(nodes, edges) {
+            const option = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    formatter: function (params) {
+                        if (params.dataType === 'node') {
+                            return `<b>${params.data.name}</b><br/><span style="font-size:12px;color:#aaa">${params.data.value}</span>`;
+                        } else {
+                            return `<b>${params.data._relation}</b><br/><span style="font-size:12px;color:#aaa">${params.data._evidence || ''}</span>`;
+                        }
+                    }
+                },
+                series: [{
+                    type: 'graph',
+                    layout: 'force',
+                    nodes: nodes,
+                    edges: edges,
+                    roam: true,
+                    label: {
+                        position: 'right',
+                        formatter: '{b}',
+                        color: 'rgba(255,255,255,0.8)'
+                    },
+                    force: {
+                        repulsion: 150,
+                        edgeLength: [50, 200],
+                        gravity: 0.1
+                    },
+                    edgeSymbol: ['none', 'arrow'],
+                    edgeSymbolSize: [4, 8],
+                    edgeLabel: {
+                        fontSize: 10,
+                        color: 'rgba(255,255,255,0.5)'
+                    },
+                    lineStyle: {
+                        color: 'source',
+                        curveness: 0.2
+                    },
+                    emphasis: {
+                        focus: 'adjacency',
+                        lineStyle: { width: 3 }
+                    }
+                }]
+            };
+            chartInstance.setOption(option);
+        }
+
+        // Load Global Graph
+        async function loadGlobalGraph() {
+            showLoading();
+            currentMode = 'global';
+            document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.control-btn:first-child').classList.add('active');
+            document.getElementById('subgraphBtn').style.display = 'none';
+            
+            try {
+                const res = await fetch('/api/graph/overview');
+                const data = await res.json();
+                renderGraph(data.nodes, data.edges);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Load Subgraph
+        async function loadSubgraph(entityId) {
+            showLoading();
+            currentMode = 'local';
+            document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active'));
+            const subBtn = document.getElementById('subgraphBtn');
+            subBtn.style.display = 'block';
+            subBtn.classList.add('active');
+            subBtn.innerText = '局部视图 (中心: ...)';
+            
+            try {
+                const res = await fetch(`/api/subgraph/${encodeURIComponent(entityId)}`);
+                const data = await res.json();
+                const centerNode = data.nodes.find(n => n.id === data.center);
+                if (centerNode) {
+                    subBtn.innerText = `局部: ${centerNode.name}`;
+                }
+                
+                // Adjust force parameters for smaller graph
+                const option = chartInstance.getOption();
+                option.series[0].force.repulsion = 300;
+                option.series[0].force.edgeLength = [80, 150];
+                chartInstance.setOption(option);
+                
+                renderGraph(data.nodes, data.edges);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Load Entity Detail
+        async function loadEntityDetail(entityId) {
+            const panel = document.getElementById('rightPanel');
+            const content = document.getElementById('entity-detail-content');
+            
+            try {
+                const res = await fetch(`/api/entity/${encodeURIComponent(entityId)}`);
+                const data = await res.json();
+                
+                const e = data.entity;
+                let html = `
+                    <div class="detail-header">
+                        <div class="entity-name">${e.name}</div>
+                        <div class="entity-type" style="color: ${data.color}; border: 1px solid ${data.color}">${e.entity_type}</div>
+                    </div>
+                `;
+                
+                if (e.source_doc) {
+                    html += `
+                        <div class="detail-section">
+                            <h4>来源文献</h4>
+                            <div class="source-doc">${e.source_doc}</div>
+                        </div>
+                    `;
+                }
+                
+                if (data.out_relations.length > 0) {
+                    html += `<div class="detail-section"><h4>传出关系 (${data.out_relations.length})</h4><ul class="relation-list">`;
+                    data.out_relations.forEach(r => {
+                        html += `
+                            <li class="relation-item" style="border-left-color: ${typeColors[e.entity_type] || '#00d4ff'}" onclick="loadEntityDetail('${r.target}'); loadSubgraph('${r.target}')">
+                                <span class="rel-label">${r.relation}</span>
+                                <div>➔ <span style="color:#fff">${r.target_name}</span></div>
+                                ${r.evidence ? `<div class="evidence-text">"${r.evidence}"</div>` : ''}
+                            </li>
+                        `;
+                    });
+                    html += `</ul></div>`;
+                }
+                
+                if (data.in_relations.length > 0) {
+                    html += `<div class="detail-section"><h4>传入关系 (${data.in_relations.length})</h4><ul class="relation-list">`;
+                    data.in_relations.forEach(r => {
+                        html += `
+                            <li class="relation-item" style="border-left-color: #6b7280" onclick="loadEntityDetail('${r.source}'); loadSubgraph('${r.source}')">
+                                <span class="rel-label">${r.relation}</span>
+                                <div><span style="color:#fff">${r.source_name}</span> ➔</div>
+                                ${r.evidence ? `<div class="evidence-text">"${r.evidence}"</div>` : ''}
+                            </li>
+                        `;
+                    });
+                    html += `</ul></div>`;
+                }
+                
+                content.innerHTML = html;
+            } catch (err) {
+                console.error(err);
+                content.innerHTML = `<div style="color:red">加载实体详情失败</div>`;
+            }
+        }
+
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        let searchTimeout;
+
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const val = e.target.value.trim();
+            
+            if (!val) {
+                searchResults.classList.remove('active');
+                return;
+            }
+            
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/api/search?q=${encodeURIComponent(val)}`);
+                    const data = await res.json();
+                    
+                    if (data.length === 0) {
+                        searchResults.innerHTML = `<div style="padding: 10px 15px; color: #666;">无结果</div>`;
+                    } else {
+                        searchResults.innerHTML = data.map(item => `
+                            <div class="search-item" onclick="selectSearchItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                                <span>${item.name}</span>
+                                <span class="type-badge" style="color: ${typeColors[item.entity_type]||'#fff'}; border: 1px solid ${typeColors[item.entity_type]||'#fff'}">${item.entity_type}</span>
+                            </div>
+                        `).join('');
+                    }
+                    searchResults.classList.add('active');
+                } catch (err) {
+                    console.error(err);
+                }
+            }, 300);
+        });
+
+        // Hide search results when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-bar')) {
+                searchResults.classList.remove('active');
+            }
+        });
+
+        function selectSearchItem(id, name) {
+            searchInput.value = name;
+            searchResults.classList.remove('active');
+            loadEntityDetail(id);
+            loadSubgraph(id);
+        }
+
+        // Init
+        document.addEventListener('DOMContentLoaded', async () => {
+            initChart();
+            await loadStats();
+            await loadGlobalGraph();
+        });
+    </script>
 </body>
 </html>

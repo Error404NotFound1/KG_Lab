@@ -126,6 +126,89 @@ def export_ttl(entities, relations, out_path: str | Path = KG_DIR / "kg.ttl"):
 
 
 
-def import_neo4j(ttl_path: str, uri: str = "bolt://localhost:7687", user: str = "neo4j", password: str = "neo4j"):
-    print("Neo4j 导入建议：先使用导出的 nodes.csv 和 edges.csv，通过 LOAD CSV 或 Python 驱动导入。")
-    print(f"当前参数：ttl={ttl_path}, uri={uri}, user={user}")
+
+
+def import_neo4j(
+    nodes_path: str | Path | None = None,
+    edges_path: str | Path | None = None,
+    uri: str = "bolt://localhost:7687",
+    user: str = "neo4j",
+    password: str = "kg_lab_2026",
+    batch_size: int = 500,
+) -> dict[str, int]:
+    """
+    将 nodes.csv 和 edges.csv 导入 Neo4j。
+    使用 MERGE 保证幂等（可重复运行）。
+    返回 {"nodes": 导入节点数, "edges": 导入关系数}。
+    需要先启动 Neo4j：cd docker && docker compose up -d
+    """
+    try:
+        from neo4j import GraphDatabase
+    except ImportError as exc:
+        raise ImportError("请执行：pip install neo4j") from exc
+
+    nodes_csv = Path(nodes_path) if nodes_path else KG_DIR / "nodes.csv"
+    edges_csv = Path(edges_path) if edges_path else KG_DIR / "edges.csv"
+
+    if not nodes_csv.exists():
+        raise FileNotFoundError(f"nodes.csv 不存在: {nodes_csv}")
+    if not edges_csv.exists():
+        raise FileNotFoundError(f"edges.csv 不存在: {edges_csv}")
+
+    nodes, edges = build_graph_data(nodes_csv.parent / "../../entities/entities_clean.jsonl" if not nodes_path else None,
+                                    edges_csv.parent / "../../relations/relations_clean.jsonl" if not edges_path else None)
+
+    # 直接读 CSV
+    import csv as _csv
+    with open(nodes_csv, "r", encoding="utf-8-sig") as f:
+        nodes = list(_csv.DictReader(f))
+    with open(edges_csv, "r", encoding="utf-8-sig") as f:
+        edges = list(_csv.DictReader(f))
+
+    driver = GraphDatabase.driver(uri, auth=(user, password))
+    node_count = 0
+    edge_count = 0
+
+    with driver.session() as session:
+        # ── 创建约束（保证 id 唯一）
+        session.run("CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (n:Entity) REQUIRE n.id IS UNIQUE")
+
+        # ── 批量导入节点
+        for start in range(0, len(nodes), batch_size):
+            batch = nodes[start:start + batch_size]
+            session.run(
+                """
+                UNWIND $rows AS row
+                MERGE (n:Entity {id: row.id})
+                SET n.name = row.name,
+                    n.entity_type = row.entity_type,
+                    n.source_doc = row.source_doc
+                WITH n, row
+                CALL apoc.create.addLabels(n, [row.entity_type]) YIELD node
+                RETURN count(node)
+                """,
+                rows=batch,
+            )
+            node_count += len(batch)
+            print(f"[neo4j] 节点导入进度: {min(start + batch_size, len(nodes))}/{len(nodes)}")
+
+        # ── 批量导入关系
+        for start in range(0, len(edges), batch_size):
+            batch = edges[start:start + batch_size]
+            session.run(
+                """
+                UNWIND $rows AS row
+                MATCH (h:Entity {id: row.source})
+                MATCH (t:Entity {id: row.target})
+                CALL apoc.merge.relationship(h, row.relation, {doc_id: row.doc_id, sentence_id: row.sentence_id},
+                    {evidence: row.evidence}, t) YIELD rel
+                RETURN count(rel)
+                """,
+                rows=batch,
+            )
+            edge_count += len(batch)
+            print(f"[neo4j] 关系导入进度: {min(start + batch_size, len(edges))}/{len(edges)}")
+
+    driver.close()
+    print(f"[neo4j] 导入完成：{node_count} 个节点，{edge_count} 条关系")
+    return {"nodes": node_count, "edges": edge_count}

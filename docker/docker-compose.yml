@@ -1,0 +1,25 @@
+services:
+  neo4j:
+    image: neo4j:5-community
+    container_name: kg_lab_neo4j
+    ports:
+      - "7474:7474"   # Web 管理界面 http://localhost:7474
+      - "7687:7687"   # Bolt 协议（Python 驱动连接）
+    environment:
+      NEO4J_AUTH: "neo4j/kg_lab_2026"
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_server_memory_heap_initial__size: "512m"
+      NEO4J_server_memory_heap_max__size: "1G"
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "neo4j", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  neo4j_data:
+  neo4j_logs:

@@ -38,21 +38,18 @@
 
 ### 已完成
 
-- PDF 文本提取
-- OCR 兜底识别
-- 文本清洗与分句
-- 工程化目录搭建
-- 多篇领域文本已提取完成并存入 `data/text/`
+- PDF 文本提取与清洗分句
+- 术语清洗与 LLM 自动化定稿
+- 实体识别（去噪清洗）
+- 关系抽取（类型约束、位置约束）
+- 图谱导出（节点 1200+，关系 5300+）
+- Neo4j 数据库接入（Docker-Compose + Python 导入）
+- 炫酷暗黑科技风图谱 Web 应用开发（FastAPI + ECharts）
 
 ### 待完成
 
-- 术语抽取
-- 实体识别
-- 关系抽取
-- 标注导入导出
-- 图谱构建与图数据库导入
-- 评估脚本
-- 知识图谱应用程序
+- 构建人工标注集并进行算法评估 (P/R/F1)
+- 演示视频录制
 
 ---
 
@@ -153,11 +150,41 @@ pip install -r requirements.txt
 python scripts/run_pipeline.py --stage preprocess
 ```
 
-如需指定单个输入文件：
+### 6.4 运行图谱抽取全流程
+
+依次运行流水线生成干净的图谱数据：
+```bash
+python scripts/run_pipeline.py --stage terms     # 抽取初步术语
+python scripts/run_pipeline.py --stage finalize  # LLM辅助清洗并定稿
+python scripts/run_pipeline.py --stage extract   # 提取实体
+python scripts/run_pipeline.py --stage clean     # 清洗实体
+python scripts/run_pipeline.py --stage relation  # 关系抽取
+python scripts/run_pipeline.py --stage kg        # 导出图谱
+```
+
+### 6.5 启动 Neo4j 并导入数据 (可选，系统支持无库内存运行)
+
+项目内置了 Neo4j 的 Docker 配置：
 
 ```bash
-python scripts/run_pipeline.py --stage preprocess --input "你的PDF路径"
+# 启动 Neo4j 数据库
+cd docker
+docker compose up -d
+
+# 导入抽取的节点和关系
+cd ..
+python -c "from kg.export import import_neo4j; import_neo4j()"
 ```
+
+### 6.6 启动知识图谱 Web 应用程序
+
+本项目自带一个炫酷的暗色科技风 Web 应用：
+
+```bash
+# 确保在 KG conda 环境下
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+启动后在浏览器打开：[http://localhost:8000](http://localhost:8000)
 
 ---
 
@@ -230,52 +257,3 @@ python scripts/run_pipeline.py --stage preprocess --input "你的PDF路径"
 8. 4–5 分钟讲解视频
 
 ---
-
-## 10. 当前建议的开发优先级
-
-### 第一优先级
-
-- 完善本体
-- 完成术语抽取
-- 完成规则实体识别
-- 完成规则关系抽取
-- 构建图谱数据
-
-### 第二优先级
-
-- 构建标注集
-- 完成评估
-- 导入 Neo4j
-- 开发应用程序
-
-### 第三优先级
-
-- 加强模型方法
-- 优化前端界面
-- 增加自然语言查询
-
----
-
-## 11. 后续开发建议
-
-如果继续推进，建议按如下顺序实施：
-
-1. 完善 `terminology/term_extraction.py`
-2. 完善 `candidate_extraction/ner.py`
-3. 新增关系抽取实现
-4. 完善 `kg/export.py`
-5. 完善 `evaluation/metrics.py`
-6. 新增应用层代码
-
----
-
-## 12. 说明
-
-当前仓库已经具备较好的工程骨架，后续重点不是继续扩目录，而是把：
-
-- 抽取
-- 图谱
-- 评估
-- 应用
-
-这四条主线真正落地，最终形成一个可答辩、可演示、可提交的完整课程项目。
