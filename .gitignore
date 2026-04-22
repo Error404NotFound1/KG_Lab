@@ -7,3 +7,6 @@ models/
 .pytest_cache/
 .mypy_cache/
 .DS_Store
+知识图谱构建数据集/*.pdf
+*.pdf 
+*.DS_*
