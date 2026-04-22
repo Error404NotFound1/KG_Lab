@@ -1,0 +1,1781 @@
+第 46 卷第 3 期
+2025 年 3 月
+宇 航 学 报
+Journal of Astronautics
+No.3
+2025
+March
+Vol.46
+跨域变构飞行器自学习模型预测姿态控制方法
+贾正宇， 张
+冉， 李惠峰
+（北京航空航天大学宇航学院， 北京 102206）
+摘
+要： 跨域变构飞行器可以根据任务环境自主改变气动外形，以最佳的气动性能完成跨空域、跨速域飞行
+任务。
+针对跨域变构滑翔段的动力学模型大范围变化，以及变构过程引起的气动扰动非线性不确定性的问题，提
+出了一种自学习模型预测姿态控制方法。
+在随机干扰和构型下，依据系统自身的模型与数据进行控制参数的学
+习，提高控制系统的鲁棒性。
+该方法在参数化模型预测控制问题的基础上，将模型偏差和构型作为随机变量，通过
+参数学习降低随机最优控制问题的代价函数，得到变构飞行器模型预测最优控制参数。
+仿真结果表明，对不同的
+构型变化任务，所提出的控制方法能够在30% 的气动参数偏差下保持较好的控制品质，且相较于未训练参数能够
+提升姿态跟踪响应速度。
+关键词： 变构飞行器； 参数学习； 自学习； 模型预测控制
+中图分类号： V448   文献标识码： A   文章编号： 1000-1328（2025）03-0499-10
+DOI： 10. 3873/j. issn. 1000-1328. 2025. 03. 008
+Self-learning Model Predictive Attitude Control Method for
+Large-flight-envelope Morphing Flight Vehicle
+JIA Zhengyu， ZHANG Ran， LI Huifeng
+（School of Astronautics， Beihang University， Beijing 102206， China）
+Abstract: The large-flight-envelope morphing flight vehicle can autonomously adjust its aerodynamic shape according
+to the environment to achieve optimal aerodynamic performance for large-flight-envelope mission.  To address the
+significant changes in the dynamic model caused by morphing and the nonlinear uncertainties in aerodynamic disturbances
+during the glide phase， a self-learning model predictive attitude control method is proposed.  This method involves learning
+of control parameters based on the system’s own model and data under random disturbances and configurations to enhance
+the controller's robustness.  Based on the parametric model predictive control problem， this method treats model deviations
+and configurations as random variables to reduce the cost function of the stochastic optimal control problem through
+parameter learning， and obtains the optimal model predictive control parameters for the morphing flight vehicle.  Simulation
+results for different morphing missions show that this control method can maintain good control quality under a 30%
+deviation in aerodynamic parameters， and improve attitude tracking response speed compared to untrained parameters.
+Key words: Morphing flight vehicle； Parameter learning； Self-learning； Model predictive control
+0 引 言
+跨域变构飞行器是指飞行包络跨0至轨道高度
+大空域、0 至第一宇宙速度宽速域、构型可变的一类
+新概念飞行器。
+这类飞行器通过调整外形改变气
+动特性，从而优化飞行性能，使其能够适应更为宽
+泛的飞行空域和速域，应对更为复杂的飞行任务和
+环境挑战，实现更优的气动效率和操控性［1］。
+然而，
+在高速飞行过程中，变构会引起复杂的气动特性变
+化，且质心位置、转动惯量等参数变化明显；因此该
+过程具有强耦合、强非线性、强不确定性等诸多特
+点，这对控制系统的设计提出了挑战［2］。
+针对上述问题，变构飞行器姿态控制采用线性
+变参数控制以及非线性控制方法。
+线性变参数控
+制将变构飞行动力学建模为变参数线性系统，通过
+增益调度［3］和自适应控制［4］等方法实时调整反馈增
+收稿日期：2024-05-30；  修回日期：2024-10-31
+基金项目：国家自然科学基金（92471204）
+宇航学报
+第 46 卷
+益，保证变构飞行的稳定性。
+切换控制也是变参数
+控制的一种，它将变构飞行器动力学建模为多个线
+性系统，针对各个线性系统设计子系统控制器，利
+用切换系统理论将子系统集成在一起，实现了变构
+飞行的稳定控制［5］。
+由于线性控制方法难以保证全
+局稳定性，非线性控制方法也被用于变构姿态控制
+中。
+利用动态逆的控制［6］能够有效解决姿态动力学
+的非线性和耦合控制问题，其与自适应控制方法相
+结合，能够有效提升系统动态特性和舵偏利用率［7］。
+滑模控制与动态逆控制相结合的控制方法［8-9］能够
+提升控制器对模型参数变化的鲁棒性；有限时间控
+制与动态逆控制相结合的控制方法［10-12］能够提升响
+应速率并降低变构执行机构的动作频率。
+随着智能控制的发展，基于学习的智能控制方
+法也被用于变构飞行器姿态控制。
+神经网络控
+制［13］和基于强化学习的控制方法［14］被用于提升变
+构飞行器控制系统的控制性能。
+文献［15］提出了
+一种基于数据驱动的无模型自适应动态规划方法，
+将构型作为状态进行姿态构型一体化控制。
+文献
+［16］提出了一种自适应神经动态曲面控制方法，不
+仅减少了神经网络参数数量，而且具有处理输入输
+出约束的能力。
+文献［17］基于增强学习理论，提出
+了一种新型的变体飞行器翼型自适应控制方法，可
+以满足变体飞行器在多任务状态下保持最优性能
+的需求。
+文献［18］基于T-S 模糊理论建立了变形飞
+机的T-S 模糊模型，设计了模型参考自适应飞行控
+制算法，并通过仿真验证了该方法抑制外界干扰的
+能力。
+文献［19］提出了一种基于二型TSK 模糊滑
+模控制的切换自适应控制方法，保证了飞行器在收
+缩小翼切换过程中的稳定性和平滑性。
+文献［20］
+设计了深度确定性策略梯度学习步骤，提高了飞行
+过程中的外形优化效果。
+在上述文献中，基于学习
+的智能控制方法未能考虑随机模型偏差对控制系
+统的影响，因此这类方法对不确定性大的变构型姿
+态控制缺乏鲁棒性保证。
+此外，在学习过程中将构
+型参数作为随机变量，以训练控制器适应不同构型
+的方法，目前尚未见诸文献。
+本文针对跨域变构飞行器再入滑翔段的姿态
+控制问题，提出了一种自学习模型预测控制方法。
+首先，给出了跨域变构飞行器动力学模型；然后，构
+建了参数化模型预测控制问题，并给出了保证系统
+稳定的充分条件；同时，将模型偏差和构型作为随
+机变量，依据系统模型与系统仿真数据进行控制参
+数的学习优化，降低随机最优控制问题的代价函
+数，得到变构飞行器模型预测最优控制参数；最后，
+仿真结果验证了所提方法在不确定条件下对变构
+飞行姿态控制品质的提升。
+1 变构飞行器运动模型
+以图1所示的可变后掠飞行器为研究对象。
+为
+了在跨域飞行中实现最优的气动效率和飞行性能，
+后掠角需要根据飞行状态和飞行任务进行调整，在
+最小后掠角与最大后掠角之间连续变化（χ = 30°～
+60°），通过小后掠角提升升阻比，通过大后掠角降低
+阻力。
+后掠角变化会导致气动力、转动惯量等飞行
+参数的变化，因此建立飞行器姿态运动模型时需要
+关注后掠角变化带来的舵效和质量特性变化。
+飞行器的控制执行机构为尾部的垂尾舵面以
+及可变后掠翼上的一对水平舵面，垂尾舵面控制飞
+行器偏航运动，水平舵面控制飞行器的俯仰运动与
+滚转运动。
+通过控制分配，定义滚转、俯仰和偏航
+三通道的通道舵偏角δx，δy，δz。
+姿态控制需要使攻角α 和倾侧角μ 跟踪响应指
+令，同时镇定侧滑角β在0°，因此选用气流角描述姿
+态比较合适。
+结合动量矩定理得到的绕心转动动
+力学中三轴角速度p，q，r 的动态，6 个方程共同组成
+了姿态控制模型
+■
+■
+■
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|||
+|
+|
+|
+|
+|
+|
+α�= q - p cos α tan β - r sin α tan β +
+g
+V cos β cos μ cos γ -
+FL
+mV cos β
+β�= p sin α - r cos α + g
+V sin μ cos γ + FY
+mV
+μ�= p cos α
+cos β + r sin α
+cos β + FL tan β
+mV
+- g tan β
+V
+cosμ cosγ
+p�=[ Ixz (Ix - Iy + Iz ) pq + (IyIz - IzIz - IxzIxz )qr +
+]
+IzLA + IxzNA /(IxIz - IxzIxz )
+q�=[
+]
+(Ix - Iz ) pr - Ixz ( p2 - r2 ) + MA /Iy
+r�=[ (IxIx - IxIy + IxzIxz ) pq + Ixz (-Ix + Iy - Iz )qr +
+]
+IxNA + IxzLA /(IxIz - IxzIxz )
+（1）
+图1 可变后掠飞行器
+Fig. 1 Morphing aircraft with variable-sweep
+500
+第 3 期
+贾正宇等：跨域变构飞行器自学习模型预测姿态控制方法
+式中：g为重力加速度；V为飞行器相对地面的速度；
+m 为飞行器质量，I为转动惯量，随构型发生变化；FL
+和FY分别为升力和侧向力；LA，MA和NA分别为滚转
+力矩、俯仰力矩和偏航力矩。
+气动力与气动力矩表
+示为
+■
+■
+■
+FL = CLQSref
+FY = CYQSref
+（2）
+■
+■
+■
+|||
+|||
+LA = CmxQSrefLref
+MA = CmyQSrefLref
+NA = CmzQSrefLref
+（3）
+式中：Q 是动压ρV 2/2；Sref 是飞行器参考面积；Lref 是
+飞行器参考长度；CL，CY 分别是升力和侧向力系数；
+Cmx，Cmy，Cmz分别是三通道气动力矩系数。
+■
+■
+■
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|||
+|
+|
+|
+|
+|
+CL = (1 + ΔCL )[
+]
+Cα
+L ( χ，Ma)α + Cβ
+L ( χ，Ma) β
+CY = (1 + ΔCY )[
+]
+Cα
+Y ( χ，Ma)α + Cβ
+Y ( χ，Ma) β
+Cmx = (1 + ΔCmx )[Cα
+mx ( χ，Ma)α + Cβ
+mx ( χ，Ma) β +
+]
+Cδx
+mx ( χ，Ma) δx + C
+δy
+mx ( χ，Ma) δy + Cδz
+mx ( χ，Ma) δz
+Cmy = (1 + ΔCmy )[Cα
+my ( χ，Ma)α + Cβ
+my ( χ，Ma) β +
+]
+Cδx
+my ( χ，Ma) δx + C
+δy
+my ( χ，Ma) δy + Cδz
+my ( χ，Ma) δz
+Cmz = (1 + ΔCmz )[Cα
+mz ( χ，Ma)α + Cβ
+mz ( χ，Ma) β +
+]
+Cδx
+mz ( χ，Ma) δx + C
+δy
+mz ( χ，Ma) δy + Cδz
+mz ( χ，Ma) δz
+（4）
+式中：Cα
+L 表示升力系数对攻角的偏导数，其他类似
+符号表示对应的力或力矩系数对相关量的偏导数，
+计算方法见文献［21］；ΔC表示气动未建模动态以及
+变构引起的气动扰动偏差；此外，气动系数是后掠
+角χ的函数，随后掠角产生明显变化。
+为简化书写，定义
+■
+■
+■
+|||
+|
+|
+|
+x = [
+]
+α
+β
+μ
+p
+q
+r
+T
+u = [
+]
+δx
+δy
+δz
+T
+ω = [
+]
+ΔCL
+ΔCY
+ΔCmx
+ΔCmy
+ΔCmz
+T
+（5）
+则飞行器标称动力学模型式（1）写为紧凑形式
+x�= f (x，u，χ，ω)
+（6）
+其中转动惯量以及气动力、气动力矩都是后掠角的
+函数，因此变构飞行器的动力学具有变化范围大的
+特点；同时，受气动模型误差和变构引起的非线性
+非定常效应的影响，气动扰动具有不确定性大的特
+点。
+二者对姿态控制器的设计提出了挑战。
+2 控制器设计
+姿态控制系统在再入滑翔段的目的是：在变构
+动力学变化范围大、气动干扰不确定性大的环境
+下，所设计的控制律能够使飞行器姿态α，μ 稳定准
+确地跟踪参考指令αc，μc，同时镇定侧滑角β为0。
+2. 1 控制策略
+飞行控制品质可以由积分型代价函数表征，同
+时为了考虑飞行动力学当中不确定干扰和构型的
+影响，构造随机最优控制问题如下：
+■
+■
+■
+|
+|
+|
+|
+|||
+|
+|
+min
+θ
+Jˉ(θ) = E [ J (θ) ] = E{
+}
+∫t0
+tf
+L[
+]
+x(t)，u(t)，xc (t) d t
+s. t.    x�= f (x，u，χ，ω)
+u = u(x，χ，θ)
+（7）
+式中：θ是控制器参数；ω是随机干扰偏差，假设服从
+正态分布ω～N (0，σ2 )；χ 是飞行过程中的后掠角，
+在飞行任务前也是先验未知的，假设服从平均分布
+χ～U (30°，60°)，L 表示积分型性能指标中待设定的
+拉格朗日项。
+随机最优控制问题的解是控制器的
+最优控制参数θ*，再入滑翔任务在该控制参数下的
+代价函数J (θ) 的期望Jˉ(θ) 能够达到最小。
+为满足飞行任务的实时性要求，同时保证对未
+知干扰的鲁棒性，提出自学习模型预测控制框架，
+如图2所示：
+参数化模型预测控制策略为飞行器提供实时
+控制量，结合随机不确定干扰下的动力学模型给参
+数学习策略提供仿真样本；参数学习策略利用随机
+变构飞行器
+姿态动力学
+模型预测
+优化求解
+参数化(θ)
+预测模型
+滚动优化
+性能指标
+随机最优
+问题求解
+参数学习策略
+参数化模型预测控制策略
+不确定干扰
+J
+xc,uc
+x
+u
+Uk
+Xk
+图2 自学习模型预测控制框架
+Fig. 2 Self-learning model predictive control
+501
+宇航学报
+第 46 卷
+不确定干扰下的仿真样本对控制参数进行更新，通
+过梯度下降算法最小化代价函数。
+具体而言，模型预测控制策略基于滚动时域思
+想，通过最优化预测时域tp 内的二次型指标给出控
+制指令
+J MPC
+k
+= ∫tk
+tk + tp[
+]
+xT (t) - xT
+c (t) Q(θ) [
+]
+x(t) - xc (t)
++
+[
+]
+uT (t) - uT
+c (t) R(θ) [
+]
+u(t) - uc (t) dt
+（8）
+式中：二次型指标权重矩阵Q(θ)、R(θ) 的选取将对
+姿态控制的快速性和鲁棒性产生影响，且会随着参
+数学习而改进。
+参数学习系统根据模型预测控制策略，以及对
+随机干扰和构型的采样，通过蒙特卡洛仿真得到随
+机最优控制问题代价函数Jˉ(θ) 的近似J
+J�(θ) = 1
+K∑
+i = 1
+K
+Ji
+（9）
+进而使用梯度下降算法更新控制参数θ，得到
+一组最优控制参数，达到在随机干扰和不同构型下
+的最佳控制品质。
+整体而言，图2 所示控制框架通过参数化模型
+预测控制策略实现实时最优控制求解；同时通过在
+参数学习的动力学中引入随机扰动，提高了控制参
+数对气动干扰不确定性的鲁棒性；此外，控制器参
+数并不是针对某种确定构型训练的，在参数训练过
+程中，构型变化也被视为一个随机变量，增强了参
+数化控制器对不同构型的综合适应性。
+2. 2 模型预测控制
+为了满足控制算法的实时性，局部最优姿态控
+制基于滚动时域思想进行设计，如图3所示。
+其中，动力学采用雅克比线性化的动力学方程
+x�(t) = f (xc，uc，χ ) + A( χ ) [
+]
+x(t) - xc (t)
++
+B( χ ) [
+]
+u(t) - uc (t)
+（10）
+式中：uc (t) 是配平舵偏，有：
+uc (t) = B-1 ( χ ) [
+]
+-f (xc，uc，χ ) + A( χ )xc (t)
+（11）
+将式（11）代入式（10）得到
+x�(t) = A( χ )x(t) + B( χ )u(t)
+（12）
+式（12）是模型预测控制的动力学模型，其中
+■
+■
+■
+|||
+|||
+A( χ ) = ∂f
+∂x | xc，uc
+B( χ ) = ∂f
+∂u | xc，uc
+（13）
+将式（12）进行离散化
+x(k + 1) = Φ( χ )x(k) + Γ ( χ )u(k)
+（14）
+局部最优指标采用参数化的滚动时域二次型
+指标式（8），其离散形式为
+J MPC
+k
+= [(
+)
+xT
+(i) - xT
+c(i) Q(θ) (
+)
+x(i) - xc(i) +
+]
+(
+)
+uT
+(i) - uT
+c(i) R(θ) (
+)
+u(i) - uc(i)
++
+(
+)
+xT
+(N + k) - xT
+c(N + k) Qf (θ) (
+)
+x(N + k) - x(N + k) （15）
+式中：Q(θ) = θT
+QθQ，R(θ) = θT
+RθR 均为待学习的控制
+器参数。
+式（14）和式（15）组成了模型预测控制器
+■
+■
+■
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|
+|||
+|
+|
+|
+|
+min
+Uk J MPC
+k
+= ∑
+i = 0
+N - 1
+[(
+)
+xT
+( |
+k i) - xT
+c(k + i) Q(θ) (
+)
+x( |
+k i) - xc(k + i) +
+]
+(
+)
+uT
+( |
+k  i) - uT
+c(k + i) R(θ) (
+)
+u( |
+k i) - uc(k + i)
++
+(
+)
+xT
+( |
+k N ) - xT
+c(k + N ) Qf (θ) (
+)
+x( |
+k N ) - xc(k + N )
+s.t.   x( |
+k  i + 1) = Φ( χ )x( |
+k i) + Γ ( χ )u( |
+k  i),i = 0,…,N - 1
+x( |
+k i) ∈χ ⊂Rm
+u( |
+k  i) ∈Ω ⊂Rn
+x( |
+k 0) = x(t)
+（16）
+式中：Qf (θ) 表示终端权重矩阵；Uk =[uT
+( |
+k 0)   uT
+( |
+k 1)   ⋯
+]
+uT
+( |
+k N - 1)
+T 表示第k 时刻待优化的预测控制序列； χ 和
+Ω 表示状态量和控制量的可选凸集；x( |
+k 0) 表示在t时
+刻测量得到的状态量。
+模型预测控制选择u( |
+k 0) 作
+为输入系统的当前时刻控制量。
+与其他参数化控制策略相比，式（16）这类控制
+器参数选择的安全性较高。
+具体而言，由于模型预
+测问题的凸性质，对于这种参数化权重矩阵Q(θ) 和
+R(θ) 的规划问题，在保证权重矩阵正定的情况下，
+满足一定条件的θ 都能产生一个稳定的闭环系统，
+因此用其进行参数学习更为安全和高效。
+下面对
+这一特性进行说明。
+选用目标函数J MPC
+k
+(x( |
+k 0)，Uk ) 作为李雅普诺夫
+函数，根据李雅普诺夫稳定性判据，要系统渐进稳
+图3 基于滚动时域的局部最优姿态控制
+Fig. 3 Rolling horizon-based local optimal attitude control
+502
+第 3 期
+贾正宇等：跨域变构飞行器自学习模型预测姿态控制方法
+定，则需同时满足下面2个条件
+■
+■
+■
+|||
+|||
+J MPC
+k
+(0，0) = 0并且当x( |
+k  0) ≠0时J MPC
+k (
+)
+x( |
+k 0)，Ut > 0
+J MPC
+k (
+)
+x(k + |1 0)，Uk + 1 - J MPC
+k (
+)
+x( |
+k  0)，Uk < -α(
+)
+‖
+‖
+x( |
+k  0)
+（17）
+式中：α 为正定函数。
+由于目标函数是二次型形式，
+因此其显然满足式（11）的第1个条件。
+下面给出满
+足第2个条件的定理。
+首先定义线性化和未建模动态带来的预测
+误差
+δi‖
+‖
+x( |
+k i)
+2
+= xT
+(k + |1  i)Q(θ)x(k + |1 i) - xT
+( |
+k  i + 1)Q(θ)x( |
+k i + 1)
+（18）
+定理1. 如果终端状态权重矩阵Qf (θ) 满足式（19）
+-xT
+( |
+k N )Qf (θ)x( |
+k N ) + xT
+( |
+k N + 1)Qf (θ)x( |
+k N + 1) +
+∑
+i = 0
+N
+δi‖
+‖
+x( |
+k  i)
+2
++ xT
+( |
+k  N )Q(θ)x( |
+k  N ) ≤0
+（19）
+则式（17）第2 个条件成立，进而得到式（12）系统渐
+进稳定的结论。
+证明过程见附录A。
+下面进一步推导式（19）的充分条件。
+首先，
+x( |
+k N + 1) 可以写为
+x( |
+k N + 1) = Φx( |
+k N ) + Γu( |
+k N )
+= (Φ + ΓK∞)x( |
+k N ) = Aclx( |
+k N )
+（20）
+式中：K∞是LQR增益矩阵，通过黎卡提方程求取。
+K∞= -(ΓP∞Γ + R)
+-1ΓP∞Φ
+（21）
+P∞= Q + ΦTP∞ΦΦTP∞Γ(R + Γ TP∞Γ)
+-1ΓTP∞Φ
+（22）
+将式（20）代入式（19）得到
+xT
+(
+)
+|
+k N [ AT
+clQf (θ) Acl + Q(θ) - Qf (θ) + δIn] x(
+)
+|
+k N ≤0
+（23）
+式中：δ =∑
+i = 0
+N
+δi‖
+‖
+x(k | i)
+2
+。
+因此，式（19）成立的充分条件是
+AT
+clQf (θ) Acl + Q(θ) - Qf (θ) + δIn = 0
+（24）
+给出了模型预测控制系统渐进稳定的参数条件。
+式（24）给出了求取终端状态权重矩阵Qf (θ) 的
+公式，其中预测误差δ 需要根据动力学模型的非线
+性和飞行工况的不确定性程度进行估计，非线性程
+度可以参考文献［22］给出的系统非线性测度计算
+方法。
+当系统非线性和不确定性较大时，需要取较
+大的δ，得到较为保守的Qf (θ)，以保证系统的鲁棒
+性；反之当系统线性化程度高且模型较为精确时，
+可以取较小的δ，以提升系统响应性能。
+2. 3 参数学习算法
+变构飞行给动力学带来较大的非线性特性与
+不确定干扰，对控制器提出了更高的鲁棒性要求，
+因此很难通过直接给出确定性控制参数的方式保
+证飞行性能。
+对此，本文采用随机控制问题框架，
+以随机干扰的形式构建气动不确定等因素的影响
+机理，通过优化随机代价函数的期望进行控制参数
+的自学习，提高控制器的鲁棒性。
+结合上文的参数化模型预测控制，参数优化算
+法式（7）可以表示为
+■
+■
+■
+|||
+|||
+min Jˉ(θ) = E{
+}
+∫t0
+tf
+L[
+]
+x(t)，u(t)，xc (t) dt
+s. t.   x�= f (x，u(x，xc，χ，θ)，χ，ω)
+（25）
+式中：u由式（16）隐式给出，由控制器参数θ决定，所
+以Jˉ取决于控制参数θ。
+通常Jˉ(θ) 的准确值不能直接获得，而是通过蒙
+特卡洛近似获得。
+给定控制参数θ，对状态初值x0、
+后掠角χ 以及扰动ω 进行采样，可以获得若干个独
+立的状态和控制轨迹[
+]
+x1 (t)，u1 (t)，χ 1 (t)，ω1 (t) ，  …，
+[ xK (t)，uK (t)，
+]
+χ K (t)，ωK (t) ，进而可以得到Jˉ(θ) 的估
+计值
+J�(θ) = 1
+K∑
+i = 1
+K
+Ji
+（26）
+其中
+Ji = J[
+]
+xi (t)，ui (t)
+= ∫t0
+tf
+L[
+]
+x(t)，u(t)，xc (t) dt（27）
+参数更新策略为
+θi + 1 = ΠΘ(
+)
+θi - αi ∂J
+∂θ | θ = θi
+（28）
+式中：ΠΘ 为可行方向，αi为学习率，∂J
+∂θ 为梯度方向。
+梯度方向通过式（29）计算得到
+∂J
+∂θ = 1
+K∑
+i = 1
+K ∂Ji
+∂θ
+（29）
+∂Ji
+∂θ = ∫t0
+tf ∂L
+∂x
+∂x
+∂θ + ∂L
+∂u
+∂u
+∂θ + ∂L
+∂xc
+∂xc
+∂θ dt
+（30）
+式（30）中∂xc
+∂θ = 0，因此最后一项可以舍去。
+下面给
+出∂x
+∂θ 和∂u
+∂θ 的计算方法。
+∂u
+∂θ 需要通过局部最优姿态控制算法获得，是式
+（16）中凸优化求解得到的控制量对控制器参数的
+503
+宇航学报
+第 46 卷
+梯度。
+式（16）的凸优化紧凑形式为
+■
+■
+■
+|
+|
+|
+|
+|
+|
+min(
+)
+1
+2 zTH (θ) z + qT (θ) z
+s. t.   G(θ) z < h(θ)
+A(θ) z = b(θ)
+（31）
+其中，z = [
+]
+xT
+1
+⋯
+xT
+N
+uT
+1
+⋯
+uT
+N
+T是模型预测控
+制得到的预测时域内的状态和控制序列。
+式（31）
+的KKT条件为
+g( z，θ) =
+■
+■
+|
+|
+|||
+|
+|
+|
+■
+■
+|
+|
+|||
+|
+|
+|
+H (θ)z + qT (θ) + diag (λ)G(θ) + vT A(θ)
+diag (λ) [ G(θ) z - h(θ) ]
+A(θ) z - b(θ)
+= 0
+（32）
+设y = [ zT
+λT
+vT ]
+T，在一阶必要条件约束下，
+应用隐函数定理可得
+∂y
+∂θ = -■
+■
+||| ∂
+∂y g( z*，λ*，v*，θ)■
+■
+|||
+-1
+■
+■
+||| ∂
+∂θ g( z*，λ*，v*，θ)■
+■
+|||
+（33）
+其中
+∂
+∂y g( z*，λ*，v*，θ) =
+■
+■
+|
+|
+|||
+|
+■
+■
+|
+|
+|||
+|
+H
+GT
+AT
+diag( )
+λ* G
+diag(
+)
+Gz* - h
+0
+A
+0
+0
+（34）
+∂
+∂θ g( z*，λ*，v*，θ) =
+■
+■
+|
+|
+|
+|
+|
+|
+|||
+|
+|
+|
+|
+|
+■
+■
+|
+|
+|
+|
+|
+|
+|||
+|
+|
+|
+|
+|
+dHz* + ∂q
+∂θ + dGTλ* + dATv*
+diag( )
+λ* ■
+■
+|||
+■
+■
+|||
+dGz* - ∂h
+∂θ
+dAz* - ∂b
+∂θ
+（35）
+将式（34）和式（35）代入式（33），得到∂z
+∂θ。
+模型
+预测控制只取控制序列的第1个值，因此其中的∂u1
+∂θ
+就是需要求取的当前时刻∂u
+∂θ。
+∂x
+∂θ 的求取需要使用∂u
+∂θ (t)。
+设函数xθ (t) 为
+xθ (t) = ∂x(t)
+∂θ
+（36）
+则有
+x�θ (t) = d
+dt
+∂x(t)
+∂θ
+= ∂x�(t)
+∂θ
+=
+∂
+∂θ [
+]
+A(t)x(t) + B(t)u(t)
+=
+A(t)xθ (t) + B(t) ∂u(t)
+∂θ
+（37）
+所以xθ (t) 可以通过数值积分计算得到，其积分
+初值满足
+xθ (0) = ∂x(0)
+∂θ
+= ∂x0
+∂θ = 0
+（38）
+参数学习的算法结构如下，具体流程见图4。
+算法
+算法1. 参数学习算法
+参数学习算法
+1）设定蒙特卡洛仿真数量K，学习率α。
+2）设定飞行器初始状态x0，控制器初始
+参数θ0。
+3）设定代价函数L，求取∂L
+∂x 以及∂L
+∂u。
+4）对随机干扰ω和后掠角χ进行采样。
+5）在确定的干扰和后掠角下，对模型预测姿态
+控制系统进行仿真，得到一次仿真的状态和控制序
+列xi (t)，ui (t)。
+6）通过式（32）逐点计算KKT条件g( z，θ)。
+7）通过式（33）～（35）计算∂u
+∂θ。
+8）对式（37）进行数值积分，获得∂x
+∂θ。
+9）通过式（30）计算∂Ji
+∂θ 。
+10）将步骤1）～5）重复K 次，通过式（29）
+计算∂J
+∂θ。
+11）通过式（28）对参数进行更新，获得θi + 1。
+否
+是
+对随机干扰和
+后掠角采样
+对模型预测
+控制系统仿真
+计算性能指标
+及其偏导
+ˆ
+∂J
+∂θ
+ˆ
+∂J
+∂θ
+更新参数θ
+输出θ
+设定模型预测
+控制u及初始参数θ0
+u(x, χ,θ)
+xi(t)
+μi(t)
+ω, χ
+|θi+1−θi|<ε?
+θ
+图4 参数学习流程图
+Fig. 4 Parametric learning flow chart
+504
+第 3 期
+贾正宇等：跨域变构飞行器自学习模型预测姿态控制方法
+12）参数保持稳定时停止更新：| θi + 1 - θi | < ε。
+上述方法对各种拉偏和构型进行学习，得到的
+参数θ 具有对不确定性的随机最优性，对实际飞行
+过程当中的未知不确定性具有鲁棒性。
+此外，上述方法也可用于在线训练，以进一步
+提升对未知不确定性的适应能力。
+在在线训练方
+式中，选取过去一段时间范围内的飞行数据，以量
+测状态为线性化点，修正模型预测的参考模型，针
+对量测数据进行偏导数计算，以更新参数。
+本文采
+用的训练方式是离线训练，主要是因为训练需要蒙
+特卡洛仿真以及密集的采样点数，计算量大。
+3 仿真校验
+3. 1 参数学习仿真校验
+本节以变构飞行器滑翔段为研究对象，仿真动
+力学模型为式（1）的全量非线性模型，对所设计的
+控制律进行仿真校验与分析。
+随机最优控制代价函数选为二次型形式：
+L(x，u，xc ) = [ (x - xc )T
+uT ]
+■
+■
+|
+|
+|
+■
+■
+|
+|
+|
+Qˉ
+Nˉ
+Nˉ
+Rˉ
+■
+■
+|||
+■
+■
+|||
+x - xc
+u
+（39）
+以攻角的阶跃响应为训练任务，设定模型预测
+控制的预测步长为0. 1 s，预测步数为20 步，学习率
+αi = 0. 1，每次训练进行5 次不同拉偏的仿真，取这
+5 次的平均性能指标进行参数更新。
+考虑到模型预
+测控制问题的解只和权重矩阵Q(θ)，R(θ) 的相对关
+系有关，所以将权重矩阵R(θ) 设定为单位矩阵，而
+只对Q(θ) = diag(
+)
+Q1，Q2，Q3，Q4，Q5，Q6 进行更新。
+设置权重矩阵初值R(θ0 ) = diag(
+)
+[
+]
+1，1，1 ，Q(θ0 ) =
+diag(
+)
+[
+]
+10，10，10，10，10，10
+，图5 展示了训练过程
+中权重矩阵对角线元素的更新情况。
+其中Q1，Q5 分别对应攻角和俯仰角速度的权重
+系数。
+仿真结果显示训练次数达到60次以后，Q1和
+Q5 趋于稳定，达到最优值。
+代价函数随训练次数的
+变化如图6所示。
+图7为训练前后攻角响应的均值标准差对比图。
+训练前后仿真结果显示，在随机气动干扰和随
+机构型下，训练后攻角的均值响应速度提升23%，
+均值超调量降低11. 2%，稳态误差降低77. 6%。
+同
+时，训练后攻角响应的最大标准差减小65. 3%。
+图8 展示了随着训练次数的增加，标称无拉偏
+工况下的姿态响应。
+0
+20
+40
+60
+80
+100
+训练次数
+5
+10
+15
+20
+25
+30
+35
+40
+45
+50
+55
+权重矩阵
+Q1
+Q5
+图5 权重矩阵随训练次数的变化
+Fig. 5 Weight matrix with training iterations
+0
+20
+40
+60
+80
+100
+训练次数
+0.06
+0.08
+0.10
+0.12
+0.14
+代价函数
+图6 代价函数随训练次数的变化
+Fig. 6 Cost function with training iterations
+0
+2
+4
+6
+8
+10
+时间/s
+11
+12
+13
+14
+15
+16
+17
+攻角/(°)
+训练前均值
+训练前标准差带
+训练后均值
+训练后标准差带
+图7 训练前后攻角响应的均值标准差对比图
+Fig. 7 Comparison of the mean-standard deviation of angle of
+attack responses before and after training
+0
+2
+4
+6
+8
+10
+时间/s
+攻角/(°)
+12
+13
+14
+15
+16
+17
+未训练
+训练1次
+训练10次
+训练100次
+训练200次
+指令
+图8 标称工况姿态控制训练效果
+Fig. 8 Effects of training under nominal conditions
+505
+宇航学报
+第 46 卷
+仿真结果显示，随着训练次数的增加和控制器
+参数的更新，标称工况的攻角响应速度逐渐提高，
+超调量和稳态误差逐渐减小。
+在2. 3 GHz 处理器上进行实时性评估，上述离
+线训练平均每次训练耗时0. 57 s，计算量较大。
+而
+模型预测控制器平均每次的运算时间为0. 7 ms，满
+足实时性要求。
+3. 2 自学习模型预测控制仿真校验
+为了比较验证所设计的自学习模型预测控制
+的控制性能，将本方法与未经学习的模型预测控制
+方法以及线性变参数控制方法［23］进行对比。
+文献
+［23］的线性变参数控制方法通过求解线性矩阵不
+等式获取不同构型参数下的H∞次优控制参数，保证
+了系统L2 范数增益的次优性，与本文自学习模型预
+测控制类似，都是求解参数优化问题。
+在相同的初值与拉偏下，对常值构型下飞行姿
+态控制进行仿真，姿态响应曲线如图9所示。
+在相同的拉偏条件下，学习前后的仿真结果显
+示学习效果显著，并且自学习模型预测控制方法在
+响应速度、超调量和稳态误差方面优于线性变参数
+控制方法。
+具体来说，自学习模型预测控制通过梯
+度下降算法获得最优参数，并通过预测状态来给出
+最优控制，因此其控制性能较好。
+而线性变参数控
+制由于L2 增益的次优性，不能完全匹配模型的拉
+偏，因此在收敛时间和超调量方面表现较差。
+仿真
+结果校验了自学习模型预测控制方法的优越性。
+为了查看3 种控制器的鲁棒性，在对比仿真中
+加入了湍流，风场模型为Dryden 风场。
+在相同的状
+态初值、气动拉偏以及风场下，对常值构型下飞行
+姿态控制进行仿真，姿态响应曲线如图10所示。
+从仿真结果可以看出，3 种方法中自学习模型
+预测控制在稳态时的跟踪误差最小，三通道的最大
+误差小于0. 5°，表明自学习模型预测控制对阵风干
+扰具有较强的鲁棒性。
+最后进行变构飞行的参数学习与仿真校验。
+在
+每次仿真训练样本中，构型在0～10 s 之间和10～
+20 s之间的随机时刻各发生一次阶跃变化：
+■
+■
+■
+|||
+|||
+χ = 60°，     t ≤tm1，  tm1~U (0 s，10 s)
+χ = 30°，     tm1 < t ≤tm2，  tm2~U (10 s，20 s)
+χ = 60°，     tm2 < t
+（40）
+然后使用算法1进行参数学习。
+用训练完成后的参数进行仿真，仿真时令tm1 =
+5 s，tm2 = 15 s，即在5 s 和15 s 时后掠角发生阶跃变
+化，得到相同初值与拉偏下的仿真结果如图11所示：
+仿真结果显示，5 s 和15 s 的后掠角阶跃变化会
+带来一定的姿态偏差。
+由于自学习模型预测控制
+0
+5
+10
+15
+20
+0
+5
+10
+15
+20
+0
+5
+10
+15
+20
+0
+10
+20
+0
+5
+10
+时间/s
+−2
+−1
+0
+指令
+自学习模型预测控制
+线性变参数控制
+未学习的模型预测控制
+μ/(°)
+β/(°)
+α/(°)
+图9 常值构型的姿态响应
+Fig. 9 Attitude response of constant configuration
+0
+5
+10
+15
+20
+0
+5
+10
+15
+20
+0
+5
+10
+15
+20
+时间/s
+μ/(°)
+β/(°)
+α/(°)
+0
+10
+20
+0
+5
+10
+−3
+−2
+−1
+0
+指令
+自学习模型预测控制
+线性变参数控制
+未学习的模型预测控制
+图10 Dryden风场下常值构型的姿态响应
+Fig. 10 Attitude response of constant configuration
+in Dryden Wind Farm
+0
+5
+10
+15
+20
+0
+5
+10
+15
+20
+0
+5
+10
+15
+20
+时间/s
+μ/(°)
+β/(°)
+α/(°)
+0
+10
+20
+0
+5
+10
+−2
+−1
+0
+指令
+自学习模型预测控制
+线性变参数控制
+未学习的模型预测控制
+图11 变构型姿态响应
+Fig. 11 Attitude response of morphing
+506
+第 3 期
+贾正宇等：跨域变构飞行器自学习模型预测姿态控制方法
+参数对后掠角阶跃变化进行了针对性的学习，其后
+掠角变化引起的姿态偏差相对其他两种方法较小，
+且调节时间较短。
+这表明控制器对各种构型变化
+的学习效果显著，鲁棒性较强，表现出良好的快速
+性和控制精度。
+4 结 论
+本文针对跨域变构飞行器姿态控制问题，提出
+了一种自学习模型预测控制方法。
+该方法在参数
+化模型预测控制问题的基础上，将模型偏差和构型
+作为随机变量，通过参数学习降低随机最优控制问
+题的代价函数。
+文中给出了使参数化模型预测控
+制渐进稳定的参数条件，证明了参数选择的安全范
+围。
+此外，通过梯度下降算法，给出了参数学习策
+略的流程算法。
+仿真结果表明，运用所设计的自学
+习模型预测控制器，变构飞行器系统不但具有良好
+的稳定性和鲁棒性，而且姿态跟踪响应速度有所
+提高。
+附 录A
+定理1
+证. 首先考虑如下关系
+∑
+i = 0
+N - 1
+xT
+( |
+k i)Q(θ)x( |
+k i) = ∑
+i = 0
+N - 1
+xT
+( |
+k i + 1)Q(θ)x( |
+k  i + 1) +
+xT
+( |
+k 0)Q(θ)x( |
+k 0) - xT
+( |
+k N )Q(θ)x( |
+k N )
+（A1）
+将式（18）代入式（A1）可以得到相邻时刻目标
+函数中状态量的二次项之差
+(
+)
+xT
+(k + |1 i)Q(θ)x(k + |1 i) - xT
+( |
+k i)Q(θ)x( |
+k i) =
+∑
+i = 0
+N - 1
+δi‖
+‖
+x( |
+k  i)
+2
+- xT
+( |
+k  0)Q(θ)x( |
+k 0) + xT
+( |
+k N )Q(θ)x( |
+k N )
+（A2）
+设J * 是J 的最优值。
+为获得第k + 1 时刻J * 上
+界，考虑第k时刻目标函数最优值
+J * (x( |
+k 0)，U *
+k ) = ∑
+i = 0
+N - 1
+(xT
+( |
+k i)Q(θ)x( |
+k i) + u*T
+( |
+k  i)R(θ)u*
+( |
+k i) ) +
+xT
+(kN )Qf (θ)x( |
+k N )
+（A3）
+所得解为U *
+k。
+在第k + 1时刻如果令Uk + 1 = U *
+k，由于
+模型的非线性与不确定性，显然
+J * (x(
+|
+k + 1 0)，U *
+k + 1 ) ≤J (x(
+|
+k + 1  0)，U *
+k )
+（A4）
+式（A4）中J (x(
+|
+k + 1 0)，U *
+k )可以写为
+J(
+)
+x(
+|
+k + 1  0)，U *
+k
+= J(
+)
+x( |
+k 0)，U *
+k
+-
+xT
+( |
+k N )Qf (θ)x( |
+k N ) + xT
+(
+|
+k + 1 N )Qf (θ)x(
+|
+k + 1 N ) +
+∑
+i = 0
+N - 1
+(
+)
+xT
+(
+|
+k + 1 i)Q(θ)x(
+|
+k + 1  i) - xT
+( |
+k  i)Q(θ)x( |
+k i)
+（A5）
+将式（A2）代入式（A5）得
+J(
+)
+x(
+|
+k + 1 0)，U *
+k
+= J *(
+)
+x( |
+k 0)，U *
+k
+- xT
+( |
+k N )Q(θ)x( |
+k N ) +
+xT
+( |
+k N + 1)Qf (θ)x( |
+k N + 1) +∑
+i = 0
+N
+δi‖
+‖
+x( |
+k i)
+2
+-
+xT
+( |
+k  0)Q(θ)x( |
+k 0) + xT
+( |
+k N )Q(θ)x( |
+k N )
+（A6）
+显然如果满足
+-xT
+( |
+k N )Qf (θ)x( |
+k N ) + xT
+( |
+k N + 1)Qf (θ)x( |
+k N + 1) +
+∑
+i = 0
+N
+δi‖
+‖
+x( |
+k  i)
+2
++ xT
+( |
+k N )Q(θ)x( |
+k N ) ≤0
+（A7）
+则式（A6）化为
+J(
+)
+x(
+|
+k + 1  0)，U *
+k
+- J *(
+)
+x( |
+k 0)，U *
+k
+≤xT
+( |
+k 0)Q(θ)x( |
+k 0)（A8）
+再由式（A4）得到
+J *(
+)
+x(
+|
+k + 1  0)，U *
+k + 1 - J *(
+)
+x( |
+k 0)，U *
+k
+≤xT
+( |
+k 0)Q(θ)x( |
+k  0)
+（A9）
+证毕.
+参 考 文 献
+［1］CHU L L， LI Q， GU F， et al.  Design， modeling， and control of
+morphing aircraft： A review［J］.  Chinese Journal of Aeronautics，
+2022， 35（5）： 220-246.
+［2］王鹏， 陈浩岚， 鲍存余， 等.  变形飞行器建模及控制方法研
+究综述［J］.  宇航学报， 2022， 43（7）： 853-865.
+WANG Peng， CHEN Haolan， BAO Cunyu， et al.  Review on
+modeling and control methods of morphing vehicle［J］.  Journal of
+Astronautics， 2022， 43（7）： 853-865.
+［3］SHAMMA J S， ATHANS M.  Analysis of gain scheduled control
+for nonlinear plants［J］.  IEEE Transactions on Automatic Control，
+1990， 35（8）： 898-907.
+［4］BANERJEE S， WANG Z J， BAUR B， et al.  L1 adaptive control
+augmentation for the longitudinal dynamics of a hypersonic glider
+［J］.  Journal of Guidance， Control， and Dynamics， 2016， 39
+（2）： 275-291.
+［5］GONG L G， WANG Q， HU C H， et al.  Switching control of
+morphing aircraft based on Q-learning［J］.  Chinese Journal of
+Aeronautics， 2020， 33（2）： 672-687.
+［6］YUE T， ZHANG X Y， WANG L X， et al.  Flight dynamic
+modeling and control for a telescopic wing morphing aircraft via
+asymmetric wing morphing［J］.  Aerospace Science and
+Technology， 2017， 70： 328-338.
+［7］BAO C Y， WANG P， TANG G J.  Integrated method of
+507
+宇航学报
+第 46 卷
+guidance， control and morphing for hypersonic morphing vehicle
+in glide phase［J］.  Chinese Journal of Aeronautics， 2021， 34
+（5）： 535-553.
+［8］LIU H D， ZHANG Q Z， CUI L F， et al.  Attitude control of
+hypersonic morphing aircraft based on incremental backstepping
+sliding mode［C］.  The 7th International Conference on Intelligent
+Computing and Signal Processing （ICSP）， Xi’an， China， April
+15-17， 2022.
+［9］殷明， 陆宇平， 何真， 等.  变体飞行器变形辅助机动的建模与
+滑模控制［J］.  系统工程与电子技术， 2015， 37（1）： 128-134.
+YIN Ming， LU Yuping， HE Zhen， et al.  Modeling and sliding
+mode control of morphing aircraft for morphing-aided maneuver
+［J］.  Systems Engineering and Electronics， 2015， 37（1）：
+128-134.
+［10］CHEN H L， WANG P， TANG G J.  Fuzzy disturbance observer-
+based fixed-time sliding mode control for hypersonic morphing
+vehicles with uncertainties［J］.  IEEE Transactions on Aerospace
+and Electronic Systems， 2023， 59（4）： 3521-3530.
+［11］张豪， 王鹏， 汤国建， 等.  高超声速变外形飞行器事件触发
+有限时间控制［J］.  航空学报， 2023， 44（15）： 528494.
+ZHANG Hao， WANG Peng， TANG Guojian， et al.  Event-
+triggered fast finite time control for hypersonic morphing vehicles
+［J］.  Acta Aeronautica et Astronautica Sinica， 2023， 44（15）：
+528494.
+［12］曹承钰， 李繁飙， 廖宇新， 等.  高超声速变外形飞行器建模
+与固定时间预设性能控制［J］.  自动化学报， 2024， 50（3）：
+486-504.
+CAO Chengyu， LI Fanbiao， LIAO Yuxin， et al.  Modeling and
+fixed-time prescribed performance control for hypersonic
+morphing vehicle［J］.  Acta Automatica Sinica， 2024， 50（3）：
+486-504.
+［13］WANG Q， GONG L G， DONG C Y， et al.  Morphing aircraft
+control based on switched nonlinear systems and adaptive
+dynamic programming［J］.  Aerospace Science and Technology，
+2019， 93： 105325.
+［14］周愉， 王永海， 杨丁， 等.  一种基于目标分层架构的变形飞行
+器智能规划方法［J］.  宇航学报， 2023， 44（11）： 1670-1682.
+ZHOU Yu， WANG Yonghai， YANG Ding， et al.  An intelligent
+planning method for morphing vehicle based on hierarchical
+architecture of objective［J］.  Journal of Astronautics， 2023， 44
+（11）： 1670-1682.
+［15］BAO C Y， WANG P， TANG G J.  Data-driven based model-free
+adaptive optimal control method for hypersonic morphing vehicle
+［J］.  IEEE Transactions on Aerospace and Electronic Systems，
+2023， 59（4）： 3713-3725.
+［16］WU Z H， LU J C， ZHOU Q， et al.  Modified adaptive neural
+dynamic surface control for morphing aircraft with input and
+output constraints［J］.  Nonlinear Dynamics， 2017， 87（4）：
+2367-2383.
+［17］闫斌斌， 李勇， 戴沛， 等.  基于增强学习的变体飞行器自适
+应变体策略与飞行控制方法研究［J］.  西北工业大学学报，
+2019， 37（4）： 656-663.
+YAN Binbin， LI Yong， DAI Pei， et al.  Adaptive wing morphing
+strategy and flight control method of a morphing aircraft based on
+reinforcement learning［J］.  Journal of Northwestern Polytechnical
+University， 2019， 37（4）： 656-663.
+［18］郑曼曼.  变后掠飞行器变体过程的建模与飞行控制设计
+［D］.  南京： 南京航空航天大学， 2015.
+ZHENG Manman.  Modeling and flight control of the variable-
+sweep aircraft in the whole morphing［D］.  Nanjing： Nanjing
+University of Aeronautics and Astronautics， 2015.
+［19］JIAO X， FIDAN B， JIANG J， et al.  Adaptive mode switching of
+hypersonic morphing aircraft based on type-2 TSK fuzzy sliding
+mode control［J］.  Science China Information Sciences， 2015， 58
+（7）： 1-15.
+［20］温暖， 刘正华， 祝令谱， 等.  深度强化学习在变体飞行器自
+主外形优化中的应用［J］.  宇航学报， 2017， 38（11）： 1153-
+1159.
+WEN Nuan， LIU Zhenghua， ZHU Lingpu， et al.  Deep
+reinforcement learning and its application on autonomous shape
+optimization for morphing aircrafts［J］.  Journal of Astronautics，
+2017， 38（11）： 1153-1159.
+［21］SEIGLER T M.  Dynamics and control of morphing aircraft［D］.
+Blacksburg： The Virginia Polytechnic Institute and State
+University， 2005.
+［22］JENSON E L， SCHEERES D J.  Semianalytical measures of
+nonlinearity based on tensor eigenpairs［J］.  Journal of Guidance，
+Control， and Dynamics， 2023， 46（4）： 638-653.
+［23］LEE J， KIM S H， JUNG S， et al.  Linear parameter-varying
+control of variable span-sweep morphing aircraft［C］.  AIAA
+Scitech 2019 Forum， San Diego， USA， January 7-11， 2019.
+作者简介：
+贾正宇（1999-），男，博士生，主要研究方向为变构飞行器姿态
+控制。
+通信地址：北京航空航天大学（102206）
+电话：
+（010）61716528
+E-mail： jzybuaa@buaa. edu. cn
+张
+冉（1986-），男，博士，副教授，主要从事飞行器自主制导与
+控制方面的研究。
+本文通信作者。
+通信地址：北京航空航天大学（102206）
+电话：
+（010）61716528
+E-mail： zhangran@buaa. edu. cn
+李惠峰（1970-），女，博士，教授，主要从事高速飞行器任务决策、
+轨迹规划、制导与控制技术的研究，出版专著2部，发表论文120
+余篇。
+通信地址：北京航空航天大学（102206）
+|电话：
+（010）61716527
+E-mail： lihuifeng@buaa. edu. cn
+508

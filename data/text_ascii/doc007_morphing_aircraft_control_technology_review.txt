@@ -1,0 +1,668 @@
+航空学报
+Acta Aeronautica et Astronautica Sinica
+Oct. 25 2022 Vol. 43 No. 10
+ISSN 1000-6893 CN 11-1929/V
+http://hkxb.buaa.edu.cn hkxb@buaa.edu.cn
+引 用 / 作 者：卞宸鹏，王成才，刘华华，王薇，吕全虎
+引 用 文 献：Acta Aeronautica et Astronautica Sinica, 2022, 43(10): 527449
+（in Chinese），doi: 10.7527/S1000-6893.2022.27449
+变体飞行器控制技术发展现状与展望
+综述
+卞宸鹏1，*，王成才1,2，刘华华1，王薇1，吕全虎1
+1. 北京航空航天大学 自动化科学与电气工程学院， 北京 100191
+2. 中国电子科学研究院，北京 100041
+摘 要：变体飞行器可利用变形结构或改变外形与机理适应复杂的飞行任务需求，在军用与民用领域均具有极高的研究价值和应用前景。
+随着对飞行器结构、任务和环境需求的不断升级，变体飞行器控制系统技术作为实现变形能力与任务性能的关键环节，正逐渐成为研究热点。
+本文首先结合变体飞行器的研究背景与意义出发，围绕变体飞行器控制技术的基本需求与技术框架，梳理其在气动与结构耦合、系统建模与控制策略、任务规划与自主决策等方面的研究进展，并对现有控制技术的主要挑战与发展趋势进行总结。
+最后，针对当前变体飞行器控制技术仍存在的不足，提出未来在多物理场建模、快速高可靠控制、智能化与自适应决策、验证评估体系等方面的发展展望。
+关键词：变体飞行器；
+控制技术；
+变形决策；
+闭环系统建模；
+姿态控制
+中图分类号：V11；
+V249
+文献标识码：A
+文章编号：1000-6893(2022)10-527449-18
+图 1 一种变体飞行器翼型组态可变示意图
+Fig. 1 Typical mission profile of a morphing aircraft
+Fig. 1 Typical mission profile of a morphing aircraft
+图 1 为一种变体飞行器翼型组态可变示意图。
+图中展示了不同飞行段中翼型结构的变化过程，以适应不同飞行任务的气动需求。
+截至目前，变体飞行器翼型变形技术已在多种任务场景中展现出潜力，如智能化飞行、复杂地形适应与机动能力增强等。
+表 1 变体飞行器研究任务及控制方法概览
+Table 1 Overview of research tasks and control methods for morphing aircraft
+考虑到变体飞行器控制系统的特点，通常需要在多模态飞行过程中实现姿态稳定、轨迹跟踪与能量管理等目标。
+同时，由于变形过程具有非线性、不确定性与时变特性，因此控制策略必须具备鲁棒性与自适应能力，并与结构变形动态、传感器信息融合及执行器约束等因素协同设计。
+责任编辑：
+基金项目：
+收稿日期：2022-05-16；
+录用日期：2022-05-22；
+网络出版日期：2022-06-28
+527449-1
+航 空 学 报
+统一机和液压系统这一问题，NASA 与波音公司于2017合发布了原同自适应机翼（Spanwise Adaptive Wing，SAW）项目，并提出了2030年智能变体飞机设计概念。
+同一时期，欧盟也开展了智能变形与传感（Smart Morphing and Sensing，SMS）项目，实现了机翼变形控制与传感技术的突破。
+在中国，北京航空航天大学、哈尔滨工业大学、同化工业大学、国内科技大学等高校和科研机构的学者也对变形翼机理和结构设计、先进仿真器与有动机和飞行器性能，气动稳定性与操纵性等方面开展了研究工作，而本文基于航天变形机翼的相关研究和飞行器气动建模方法，提出了一种基于涡特征的机翼变形控制方法。
+图2展示了WoS上发文作者关于“morphing aircraft”和“morphing wing”的搜索结果，其中2019年发布的文献数峰值最显著。
+可以发现，国内外对变形机翼技术的研究正处于快速发展阶段。
+近年来，随着仿真计算和制造技术的发展，针对不同变形方式的机翼设计方案不断涌现。
+目前，变体飞行器设计的仿生化趋势明显，尤其是在对自然界生物的理解基础上，结合飞行器实际需求进行总体设计从而实现整体性能优化；
+例如，仿生翼的机翼结构以及与其对应的变形特性等。
+通过仿生机理的研究与分析，有望推动变体飞行器在气动性能与任务能力方面的持续进步。
+近年来，各国研究学者已经发表关于变体飞行器结构、机理和性能的研究。
+针对变体飞行器的不同变形方式，研究人员从多个角度对其结构设计、控制方法与控制策略进行了深入探讨。
+例如，有研究指出，变体飞行器的变形控制可通过多学科协同设计与优化来实现。
+同时，基于仿真与试验数据的反馈，也可以进一步提高变体飞行器的设计准确性和可靠性。
+图3展示了仿生变体飞行器的结构示意，其中包括次级翼段、主翼段和指骨段等。
+该结构通过模拟鸟类飞行时的肌肉形态与羽翼展开方式，实现机翼的变形与气动特性匹配。
+相关研究还表明，仿生结构的变形方式有利于提升飞行器的机动性能，并可实现更高效的能源利用。
+目前，国内外针对变体飞行器的研究已取得一定进展，但仍存在一些挑战，包括变形结构的强度与可靠性、变形控制算法的鲁棒性以及在复杂气动环境下的性能稳定性等。
+未来，随着人工智能、先进材料与控制理论的进一步发展，变体飞行器在工程应用方面将会更具广阔前景。
+527449-2
+航空学报
+发展现状，并对智能变体飞行器的发展趋势进行分析总结。
+上述文献(17-19)分别从变体飞行器机故设计、模型建立与分析、控制技术和在变体飞行器上的应用几个方面进行了综述，但是缺乏变体飞行器姿态决策与控制方面的研究介绍，以及对针对整机系统设计的详细综述。
+鉴于此，本文通过近10年来变体飞行器播控领域的文献进行梳理，在简述工作基础上，对变体飞行器主要基于实现的技术或研究并探索相应解决方案，包括相关关键技术设计方法等，以期为未来变体飞行器播控技术的发展提供参考。
+1 变体飞行器变形决策
+变体飞行器可以通过主动变形或借助其气动性能，使其能够适应多种飞行任务和飞行条件。
+如何根据不同环境做出相应变形决策以提升性能，是变体飞行器变形决策中的一大难题。
+变体飞行器变形决策可以认为是一种从任务需求到机体构型选择的映射问题。
+变形决策涉及机体构型的选择及其切换逻辑，同时还需要考虑变形动作的时间与能耗等因素。
+相关研究主要可以分为两类：基于规则的变形决策和基于优化的变形决策。
+1.1 传统的变形决策
+传统的变形决策可通过指令式的方案，如先划分航段不同的飞行任务（如起降、巡航、机动等），对应此时的飞行任务，进行相应的变形方案[20]，然后根据变体飞行器常见的气动特性，计算出在不同日标速度、不同气动外形等情况下的飞行阻力和升力，从而获得变形任务切换到不同构型时的变形方案[21]。
+例如某一变体飞行器在飞行过程中可以采用攻角、翼面后掠角等参数来实现气动性能的变化，但由于其控制方式较简单，难以保证在复杂任务条件下的最优性能。
+传统变形决策大多依赖预先定义的规则，缺乏对飞行状态的实时反馈，从而使得决策效果有限。
+例如有研究表明在传统的基于规则变形决策中，存在一定的适应性问题，因而难以满足复杂任务条件下的最优控制需求。
+1.1.1 基于优化的变形决策
+相比规则式的变形决策，优化式的变形决策通过求解最优问题来得到最合适的构型选择和切换逻辑。
+其基本思想是在给定任务条件下，定义性能指标函数，通过求解最优问题获得变形决策策略。
+常见的优化方法包括动态规划、遗传算法、粒子群算法及模型预测控制等。
+例如通过动态规划方法，先对飞行任务进行航段划分，再对各航段选择最优构型，以实现总体性能的最优。
+通过遗传算法或粒子群算法，则可以在较大搜索空间中寻找最优解，但计算量相对较大，难以满足实时控制的需求。
+由于变体飞行器的构型变化通常受到几何约束与执行器能力约束，因此优化式方法一般需要考虑动力学模型及约束条件。
+已有研究表明，基于优化的变形决策方法能够获得更好的任务适应性与性能表现，但仍面临模型误差、计算复杂度以及实时性等问题。
+1.2 智能变形决策
+对于变体飞行器而言，每个构型都有其特定飞行特性（马赫数、高度、迎角和侧滑角）以及其对应的性能指标，如升力、阻力、速度响应等。
+对于智能变形决策方法而言，需要根据飞行状态的实时信息（如速度、高度、攻角等），选择最优构型或切换时间，并对未来状态进行预测，以实现对飞行任务的自适应控制。
+图4 随翼面倾角的姿态飞行器随侧偏角的多种组合
+（a）图[23]
+527449-3
+航 空 学 报
+或或者完全改变，此时上述方法得到的变形策略就不是全部最优的。
+实践任务需若若在装载下的任务中，需要快速地在不同的状态下进行学习与调整，这样才能更好地适应环境并达到预期目标。
+人工智能能够在近 30 年来得到了飞速的发展，人工智能进化与多方法相结合，深度学习作为新兴研究领域之一，对智能飞行器发展变形策略的研究起到了更为智能化的解决方案。
+深度学习是机器学习的一个重要分支，它的核心在于使用多种网络对数据进行感知和表达，并在大量的实验中进行训练。
+基于深度学习的模型能够提取环境中的关键信息，并将其用于控制系统的决策。
+深度学习能够在试错的方式中学习“试错”的方式进行学习，进而获得环境的响应。
+它的“反馈”与“强化学习”用于评估其策略，并对策略进行调整，使其在不同情境下能够达到更好的性能。
+例如深度学习中的强化学习算法采用奖励函数来指导网络学习，通过不断的迭代来优化策略。
+为了解决无人机飞行中的变形策略问题，研究者提出了深度强化学习方法，以便能够在动态环境中学习最优的变形策略。
+其中，深度学习与强化学习结合，可以提升飞行器适应复杂环境的能力。
+Deep Reinforcement Learning算法（DRL）在无人机任务中展现出良好表现。
+例如，通过训练智能体学习如何在不同环境条件下实现动态调整，使得无人机能够在遇到障碍物时进行机动与规避，从而提高任务执行成功率。
+上述方法为解决变形策略问题提供了新的思路。
+然而，随着无人机任务的复杂化与环境的多样化，传统方法往往难以适应动态变化，因此需要在变形策略研究中引入更强的智能化方法。
+结合深度神经网络的逼近状态-动作策略，可以用于处理连续动作空间的决策。
+通过对状态的深度特征学习，能够有效地逼近真实的最优策略。
+文献[33]针对某一种由DDPG算法对两种目标进行优化的变形行为策略，并给出了针对不同飞行状态的变形策略求解方法。
+文献[34]提出了一种改进DDPG算法用于一种在无人机上的Q学习，用于处理无人机在不同环境条件下的变形需求。
+（Table 1 变体飞行器变形策略方法）
+表1 变体飞行器变形策略
+策略类型
+策略表达方式
+适用范围
+强化学习（Q-Learning）
+指令式
+离散信息/离散状态
+深度强化学习（DDPG）
+连续输入/连续输出
+连续信息/连续状态
+2 变体飞行器控制
+2.1 建模
+在变体飞行器飞行控制中，变形机构在不同飞行模式下具有不同的工作状态。
+为了实现变形过程的稳定与可控，需要对变形机构的动力学进行建模，并将其作为控制系统的输入和约束条件。
+航 空 学 报
+烈的非线性、时变、气动耦合等问题。
+因此建立一个准确合适的模型对后续控制精度的设计至关重要。
+根据变形尺度大小可以将变体飞行器分为拱式、分布式、局部式3类[8]。
+其中曾嵌式大尺度变形主要通过翼身对位、机翼后缘拱伸、上反角、展展、面弧等方式来保持不同飞行条件下的最佳飞行状态；
+分布式中只度变形则以变迎翼的弯曲、弦长、翼梢等中的方式来提高飞行性能；
+局部式小尺度变形通过微弱驱动作用的方式来保持形态的调节效果。
+针对整套式的变形，可以忽略变体飞行器的变形，将其视为一个锥链连接的多闭体系统，采用多网格建模方法进行研究。
+面对于分析，采用式或大尺度时柔性变形，变形机构具有饱值度、弹性等特性，导致可能出现明显的飞行性能差异，需要进行建模与分析。
+2.1.1 多刚体建模
+将变体飞行器视为多部刚体连接的系统，采用这种多刚体的方式对多变体飞行器结构的模型进行分析建模，多刚体动力学建模方法包括以单个或多个部体为基本的多刚体运动方程、以及对每个部件的分析。
+多刚体动力学建模方法包括以单个或多个部体为基本的多刚体运动方程，并以为代表的力学模型方法，以及为面近多维等方法进行分析。
+其中一类是利用变体飞行器在不同飞行状态下的结构变形来建立相应的多刚体系统动力学模型。
+文献[40]利用单一刚体法建立了一种可变形翼机飞机构模型，可以准确描述出进出翼段方向和扭转的变化对其自身的影响。
+文献[41]引入变体扑动力学和物理等效气动模型。
+并考虑到非线性因素对多刚体系统产生的影响。
+建立了阵型翼翼飞机构的动力学模型，准确表征了阵型翼翼机飞行特性。
+文献[42]推导了Z型翼翼飞行器的效应参数动力学方程，将其用积分变换包络在状态变量构成的状态空间中，给出了对变体飞行器的动态响应。
+结果表明气动特性和变形参数会对机体在俯仰、偏航和滚转等方向的运动行为产生显著影响。
+文献[43]通过建立多刚体串联机构，分析了翼段对系统的影响，建立了多刚体系统的运动响应方程。
+文献[44]利用半球-欧拉法建立了非线性多刚体系统动力学方程，并对系统的动态行为进行分析。
+结果表明变体飞行器形变参数对飞行性能具有重要影响。
+文献[45]提出了一种可适应的高超声速宽调非线性翼面控制方法，建立包含变形引起的非线性耦合与力矩的系统状态变量，并针对不同工况设计了控制器。
+研究结果表明该控制方法在一定程度上提升了变体飞行器的响应性能。
+牛顿-欧拉法对多岐/多体系统的系统动力学的描述通常可以通过建立相应的动力学方程。
+针对不同的质量分布与姿态变化之间的非线性耦合，可以构建系统的运动方程。
+在此基础上，针对多刚体系统的多体动力学建模采用拉格朗日方法，该方法基于系统的广义坐标建立运动方程。
+为了便于求解，通常通过对动能与势能表达式进行推导得到系统的拉格朗日方程。
+文献[46]进一步讨论了基于多刚体系统的运动控制问题，指出通过选取合适的广义坐标可简化求解过程。
+“滑动翼变形”变体飞行器研究对象，综合考虑气动载荷、结构变形的弹性刚度，由拉格朗日方程建立了动力学模型，仿真实验验证了该方法的可行性。
+文献[48]综合考虑气动特性对多刚体变形的影响，给出了一种能够同时兼顾结构变形与气动载荷耦合效应的建模方法。
+文献[49]提出了一种用于变体飞行器的非线性时域动力学建模方法。
+527449-5
+© 航空学报编辑部　http://hkxb.buaa.edu.cn
+航 空 学 报
+时飞行器的滚拽控制，采用拉格朗日法以时空坐标系式或束流式基于的流理运动学方程，结果表明合理设计的运动屏障可以提高系统的滚拽控制能力和动力律特性。
+拉格朗日法从能量的角度出发，以广义坐标的形式建立运动副模型，且经方程可建立系统的约束力，且只适用于理想完成的系统。
+3) 认定法
+或悬浮利用广义波库代数方程式建立系统的运动，适用于圆弧尔原理直接建立为多学科运动框架和非闭环系统中，同时时可完成复杂的拉格朗日推导。
+文献[50]利用贝兹法建立了可不时弯转的飞行器的多阶阵动力学模型，并提出变形机构与机构的耦合系数，基于飞行器的多阶阵动模型和参数识别，对变形飞行器的动态行为进行了分析，结果表明该方法可以通过机构的参数选择来实现飞行器的动态特性调整。
+文献[51]采用闭环控制技术设计了一种用于无人飞行器的变形翼飞行控制策略，该策略基于模型预测控制方法实现对变形翼控制，并通过仿真和实验表明该控制方法具有良好的动态响应特性。
+文献[52]采用两端约束线性弹性理论建立了变形飞行器的飞行动力学模型，通过对弹性梁的弯曲位形和转角的约束条件进行分析，并通过实验验证模型的准确性。
+2. 1. 2 柔性体建模
+随着新型材料的引入，柔性体在飞行器成为当下研究的热点，不同于多刚体在飞行器，柔性材料具有无限群性、高度弹性、生动力的特征，伴随着小结构的建模需要，在数学模型中普遍采用柔性体建模方法来描述柔性材料的非线性行为，其模型主要包括有限元法、集中质量法以及模态综合法等方法。
+对于柔性体建模方法的选择，通常需结合柔性体的物理特性和结构复杂程度。
+在此基础上，建立相应的运动方程。
+可通过拉格朗日方程的方法建立得到系统整体的动力学模型。
+为保证模型与实验结果一致，通常将系统的运动学方程与动力学方程进行联立求解，从而得到系统整体的运动响应。
+对于变形机构的动力学分析，往往需要建立飞行器的变形方程，以便描述其内部结构的变形行为。
+文献[53]提出了基于分段弹性梁理论的变形翼结构动力学模型，将飞行器简化为由若干弹性梁组成，从而建立了变形翼的动态方程，并通过仿真验证了模型的正确性。
+文献[54]提出了基于有限元分析的变形飞行器结构动力学模型，采用模态分析方法得到结构的振动模态，并结合控制律设计方法完成了系统的耦合建模。
+文献[55]基于线性理论建立了变形飞机的气动弹性响应模型，将飞行器简化为刚柔耦合系统，从而得到结构的动态响应特性，并通过仿真结果验证了模型的有效性。
+文献[56]考虑了一种柔性杆结构的形态和前向运动特性，利用能量法建立其运动方程，并通过数值方法求解得到其动态响应。
+文献[57]提出了一种略态模型系统的形式，在该系统中利用有限元思想和结构明细方法建立飞行器的动态响应，并对其动态特性进行分析。
+文献[58]对一个大尺度无人机进行了建模，并结合相关设计方法完成了结构柔度与气动载荷的耦合分析，得到系统整体的动力学响应。
+模态分析法通常是对结构的模态形状的叠加，从而得到系统的位移响应，该方法能够较好地满足工程要求，具有较高的计算效率。
+在该基础上，文献[59]建立了带有机翼变形的刚柔耦合模型，对其进行了模态分析，并分析了折叠结构对飞机性能的影响。
+文献[60]提出了一种参数化建模方法对变形机构进行分析，以便求解机构的动态响应。
+对于柔性体的精确建模和有效的控制，通常需要进一步对柔性体的动力学特性进行分析。
+文献[61]针对典型的折叠翼结构建立了系统的弹性动力学模型，研究了其折叠翼的动态响应，并对其展开了进一步分析。
+文献[62]采用有限元和模态叠加来建立飞行器柔性部件的动力学模型，并提出了一种基于模态的控制策略，以实现飞行器柔性结构的稳定控制。
+527449-6
+© 航空学报编辑部　http://hkxb.buaa.edu.cn
+航 空 学 报
+在离散化方法的基础上，国内外学者也提出了许多创新性的乘车性能飞机带照模型方法。
+文献[63]通过往持定的飞行条件下得到他们，得到了乘车性能的线性动力学方程。
+文献[64]研究了天馈机系统飞行的稳定性，采用叶翼理论对加速度的气动力性进行了建模，考虑机载控制结构的时变效应，建立了关于六自由度非线性轨动方程。
+文献[65]提出将飞行器性与静态阵动分开，在时变对内部分的运动物理参数进行数值仿真，准确地描述了系统带飞行器的动力学特性。
+文献[66]给出了一种用非线性系统的方式采样多乘车性能建模方法，避免了离散化产生的不连续或效应，也简化了方程推导过程。
+总体来说，乘车性能模块方法得到的模型精度较高，计算误差在可接受范围之内，能够较好地表征乘车性能的结构特征，但计算复杂度较大，有限机率机约余算法的维序化处理方法略显不足。
+2.2 变姿控制
+变体飞行器的外形变化会导致高质量分布和气动参数的显著变化，开导外部扰动以及变更多致的塑性力和力矩会对飞行控制产生不同程度的影响。
+为此，变体飞行器的控制系统设计带来了很大的挑战。
+由于，非线性扰动的难以准确建模，通常不依赖精确的模型设计来完成控制设计，而变体飞行器在控制时将其看作具有一定的不确定性的对象进行建模。
+线性参数变换方法（Linear Parameter Varying，LPV）能够将控制器的设计与系统参数的变化绑定在一起，以满足不同工况下的控制要求。
+表2[6-79]给出了变体飞行器的主流控制方法。
+表2 变体飞行器控制方法[6-79]
+Table 2 Morphing aircraft control methods[6-79]
+类别
+传递线性控制
+切换L P V控制
+非线性控制
+智能控制
+子类/方法
+PID + 线性控制[6-78]
+PID-1控制与动态适配[6-78]
+LQR[7-7]
+LQR[7-8]
+LQ R[7-7]
+LPV + 平台生机时间[3-74]
+LPV + 平均时间+区域间分段+线性化[6-75]
+LPV + 平均时间+时间[6-74]
+LPV+掩常时间+H∞[6-79]
+LPV + L 2增益计算+H∞[3-74]
+LPV + 稳定性增强[6-75]
+LPV + PID[9-73]
+LPV + 滑模控制[9-73]
+LPV + 单纯性控制[9-73]
+LPV + 变结构控制[9-73]
+LPV + 约束线性规划[6-78]
+反步法 + 无视扰动[9-74]
+反步法 + 干扰观测器[9-75]
+反馈线性化[9-71]
+自适应控制[9-72]
+基于李亚普诺夫的自适应控制[9-74]
+开关控制（掩常、离散，时域）[9-74]
+路径跟踪控制[9-75]
+变换方式
+滞留变换观测
+平衡变换观测
+未定义变换观测
+折叠变换观测
+折叠变换
+开环模式控制
+拓扑变换
+滑模变换
+多重变换
+变换
+反馈变换
+折叠变换
+变换策略
+交替变换
+变换策略
+平均变换
+并联变换
+基于神经网络
+确定性策略
+对称变换
+527449-7
+航 空 学 报
+2.2.1 传统线性控制
+传统飞行器控制方法主要包括 PID，最优控制、增益调参、鲁棒控制等，这些方法在长期的理论探索及工程实践中，体现出一定的优越性并得到了广泛的应用，在实践中任务繁重的控制系统也取得了一定的效果。
+PID 控制方法不仅耗时平衡的动态模型结构简单，具有较强的自适应性和鲁棒性。
+大多数飞行器都采用常规的 PID 控制策略，这种方法在设计中通过对各通道进行精确的调参来保证系统的稳定性，同时也需要根据飞行器的具体控制对象进行系统响应优化。
+尤其在飞机的纵向控制中，PID 控制器通过对速度、迎角等参数的反馈调节来实现精确的控制。
+然而在一些情况下，传统的 PID 控制会遇到非线性时变系统导致控制难以精确实现的问题。
+此外，飞机在某些飞行阶段可能会存在较强的非线性和时变性，PID 控制难以保证在各种飞行工况下都能实现稳定和精确的控制。
+因此需要在传统线性控制的基础上引入更先进的控制方法，例如 LQR（线性二次型调节器）和 MPC（模型预测控制）等，这类方法能够更好地处理复杂的动力学特性和约束条件，提高飞行控制的鲁棒性和稳定性。
+比如，LQR 控制可以通过对系统状态进行优化实现控制信号的生成，从而提高系统的性能。
+在此基础上，一些研究者将 LQR 和 PID 等传统控制算法进行组合，实现了更好的控制效果。
+在工程应用中，通常需要综合考虑系统建模误差、执行器饱和、传感器噪声等因素，才能设计出实际可行的控制器。
+2.2.2 切块 L P V 控制
+阵随着飞行器外形、例如机翼的后掠角、翼展或折叠等的改变，变体飞行器的重心、转动惯量等参数以及气动力、力矩等气动参数会相应发生变化。
+而在这种情况下，传统控制策略往往难以准确建立系统的动态模型，从而无法实现对飞行器的准确控制。
+为了解决上述问题，研究人员提出了切块 LPV（Linear Parameter Varying）控制方法。
+该方法将飞行器的运动特性和气动参数视为可变参数，进而将模型写成参数化的形式。
+由于参数变化具有一定的局部性，可将整个参数变化区间分割成若干子区间，并针对每个子区间建立相应的线性模型，然后通过在线调度技术实现对模型的切换，从而保证系统在参数变化范围内具有稳定性和性能。
+切块 LPV 控制的核心思想是：将整个参数变化域划分为若干子集，并对每个子集建立对应的线性模型，再根据当前的参数值选择最合适的线性模型进行控制。
+这样可以避免直接对全局非线性模型进行复杂的求解，同时又能较好地逼近原始系统的非线性特性。
+其控制律通常通过求解 LMI（线性矩阵不等式）得到，从而确保闭环系统稳定并满足性能指标。
+由于 LPV 模型具有参数依赖性，切块 LPV 控制器可通过对不同切块的控制器增益进行在线切换实现对系统的实时控制。
+通过这种方式，切块 LPV 控制器能够在参数变化较大的情况下保持较好的鲁棒性与稳定性，并减少建模误差对控制效果的影响。
+“ 2 ）” 进行相关参数调度，从而实现对飞行器的准确控制。
+航 空 学 报
+剩余参数随高度、马赫数和初压的变化而变化，总是增谣高g时的思想。
+其优点在于，在每个工作点附近都可以运用成熟的理论来设计控制算法，并且系统能输出随度变化的变化而逐值结果，有比较强的性能指标。
+采用了受控温偏思路的影响，文献[79]在保证稳定性的前提下，控制策略通过不断调整高度、马赫数和初压的变化，使系统性能获得优化。
+基于该方法，在文献[79]中提出了一个基于LPV模型的非线性控制方法。
+该方法利用LPV模型中参数可调的特性，将控制律的动态参数与飞行姿态误差相耦合，进而保证系统的稳定性和性能。
+3）LPV+其他控制
+LPV模型除了结合当前理论外，还可和其他方法混合使用，如文献[80]将引入SOF模型动态来解决控制问题。
+结合文献[81]提出的结构范式，将PID控制器用于新模型的仿真控制，其中研究新模型动态与控制算法之间的一一对应关系。
+文献[82]将加雅种保形理论与多变量自适应控制相结合，提出了一种用于控制飞行器非线性系统的自适应控制策略。
+该方法在数学上刻画了系统的动态方程，并将其稳定性设计为闭环系统的稳定性。
+2.2.3 非线性控制
+对于LPV方法，无论是切换还是非切换模式，均需要对变量飞行器的非线性运动模型进行配平和小扰动线性化处理，所以设计的控制器在飞行器的非线性中是难以解决实际问题的。
+为此，一般希望采用非线性方法进行控制。
+其中，最常见的一类非线性控制器包括滑模控制。
+在该控制策略中，不同工况的系统状态被限制在某个滑模面上，从而保证系统的稳定性和性能。
+滑模控制器还可以在存在扰动情况下实现快速收敛。
+文献[83]提出了一种基于滑模控制的非线性控制方法。
+1）滑模控制
+滑模控制（Sliding Mode Control, SMC）也称为滑模控制法，是一种基于非线性误差系统设计的控制策略。
+它可以在动态过程中，根据系统当前的状态和已知的反馈结构，通过切换的方式来保持系统的状态始终在滑模面上。
+滑模控制法由于引入了开关控制律，可以有效克服系统不确定性，并能保证系统误差的快速收敛。
+由于滑模控制具备良好的鲁棒性，其在非线性系统控制中得到了广泛应用。
+文献[84]将有限时间收敛微分控制（Finite Time Convergence Sliding Mode Control, FTC）用于设计一种滑模控制律，以满足系统的有限时间收敛性能。
+该控制方法引入了非线性趋近律，可以使系统在有限时间内到达滑模面，并维持滑模面上的运动，从而实现误差的有限时间收敛。
+文献[85]提出了一种非线性扩张状态观测器（ESO）与滑模控制相结合的方案。
+该方法通过观测器估计系统的不确定性和外界扰动，并将估计值用于控制律中，从而增强系统的鲁棒性。
+文献[86]在文献[85]基础上提出了一种具有自适应能力的滑模控制算法。
+该算法基于自适应机制对控制参数进行在线更新，从而在不同工况下保证系统的收敛性能。
+文献[87]基于非线性动力学模型，分别设计了反馈线性化控制器和滑模控制器，对2种控制方法的系统稳定性进行了分析。
+文献[88]在文献[87]基础上进一步提出了一种扰动观测器与滑模控制相结合的方案。
+该方法通过扰动观测器估计外界扰动，实现控制律的补偿，从而提高系统的抗扰能力。
+文献[89]在文献[87]基础上提出了一种连续型滑模控制方法，以减少控制抖振现象。
+该方法通过对滑模面附近的控制律进行平滑处理，使系统输出更加平稳，从而提高控制系统的实际应用性。
+527449-9
+航 空 学 报
+气动扰动仿真验证了该液橡控制器的常样特性。
+2）扰动控制
+由于飞行环境的复杂，变体飞行器控制系统应能能够在存在内部不确定性和外部干扰的情况下稳定飞行。
+因此，研究飞行器的扰动控制方法也非常重要。
+随着飞来技术的进步，扰动观测[10-16]的发效率以及非线性控制系统上的成功应用，部分学者将这类方法引入到变体飞行器进俟系统中，来研究并应用变体飞行器的控制，来提高闭环系统的稳定性。
+文献[89]建立了变体飞行器带线性切换机制，并且通过切换状态(Adaptive Dynamic Programming，ADP)设计了最优切换控制器，然后针对变体飞行器的动态不确定性，设计了一种切换观测器来对飞行场量和速度的未知偏差进行估计，从而在保证控制精度的基础上提高了闭环系统的控制精度。
+在上述方法建立了变体飞行器的非线性系统模型，并在此基础上给出了不同的控制方法，提出了在闭环系统中动态存在的负荷特性。
+文献[90]研究了变体飞行器的测量过程和动态不确定性对控制性能的影响，进而指出了在变体飞行器的闭环系统中存在的外部扰动对控制系统的影响。
+文献[91]在对变量变换控制器中加入扰动抑制器，来提高飞行器的稳健性，设计了一种复合抗干扰控制器。
+控制器内环的系统输出采用了非线性控制律来实现，从而实现对飞机姿态和速度的闭环控制。
+文献[91]采用了自适应动态规划来实现对飞行器外部扰动的抑制，进而实现闭环系统的稳健控制。
+2.4 智能控制
+随着人工智能技术的迅速发展，智能控制理论也逐步应用于控制领域。
+同时，变体飞行器样线性控制系统的性能也为智能方法在其中的应用提供了很好的载体，越来越多学者开始用智能方法来提升变体飞行器摆搭控制系统的控制性能。
+在变体飞行器摆搭控制系统设计方面，采用的智能控制方法主要集中于神经网络和模糊逻辑的应用，或将其与其他方法相结合。
+特别地，神经网络能够有效地实现复杂系统的非线性映射，因而在摆搭控制系统中得到了广泛应用。
+神经网络控制装置在摆搭控制系统中采用神经网络实现对输入信号的拟合、对输出信号的预测和对系统状态的估计。
+与传统控制方法相比，神经网络能够更好地逼近复杂系统的非线性动力学特性，并且能够在系统在线运行时实现自适应调整，从而提高系统的控制性能。
+近年来，深度学习算法也开始应用于变体飞行器摆搭控制系统中，实现了更精细的特征提取，从而改善了系统的控制效果。
+改善降扰诊断等。
+神经网络控制的发生能力具有复杂非线性，不确定性强的变体飞行器摆搭控制系统的控制问题，确立了多种自适应控制和模型预测控制等方法，并对其效果进行了验证。
+文献[93]针对变体飞行器摆搭的控制问题，对比分析了不同控制策略的性能，并且提出了一种基于降噪的自适应控制方法，以提高变体飞行器摆搭控制精度。
+文献[94]对变体飞行器摆搭控制系统的性能进行了研究，提出了一种利用深度学习方法进行参数估计和控制策略更新的控制方法，从而提高了系统的稳定性。
+文献[95]针对变体飞行器摆搭控制系统中的不确定性，提出了一种基于最优控制理论和神经网络的复合控制方法，并对其控制性能进行了仿真验证。
+文献[96]提出了一种基于强化学习算法的控制方法，通过对系统状态和奖励函数的设计，实现对变体飞行器摆搭控制的优化。
+文献[97]则将生成对抗网络用于变体飞行器摆搭控制系统中，实现对不确定扰动的建模和抑制，从而提高了系统的鲁棒性。
+此外，智能诊断方法在变体飞行器摆搭控制系统中也得到了研究。
+文献[98]提出了一种基于模态分解和神经网络的故障诊断方法，通过分析系统的频域特征，实现对故障模式的识别和分类。
+文献[99]提出了一种基于滑动窗口的故障检测算法，并利用自组织映射网络进行故障分类。
+文献[100]提出了一种基于时频分析和深度学习的故障诊断方法，并对其在变体飞行器摆搭系统中的有效性进行了验证。
+此外，在智能控制方法方面也出现了许多新的研究方向，如多智能体协同控制、分布式控制、群体智能优化等。
+多智能体协同控制能够实现多个控制器之间的信息共享和协同工作，从而提高整体控制性能。
+分布式控制通过将系统分解为多个子系统并独立控制，能够降低计算复杂度并提高系统的可扩展性。
+群体智能优化则通过模拟群体行为的优化机制，实现对控制参数的自动调整，从而提高系统的控制精度和鲁棒性。
+智能控制方法在变体飞行器摆搭控制系统中的应用具有重要意义。
+随着相关算法和硬件平台的发展，未来智能控制方法将更好地满足变体飞行器在复杂环境下的稳定性和可靠性需求，并推动相关技术向更高水平发展。
+527449-10
+© 航空学报编辑部　http://hkxb.buaa.edu.cn
+航 空 学 报
+供林飞机控制作用、优化现有控制器设计参数以及现有控制器和优化学习控制器切换方式。
+文献[96]采用了三自由度的线性时频系统来描述纵向高回旋运动，基础控制器基于振荡状态观测器的思想，设计了改进的干扰观测器来估计扰动，并结合总体阵对驱动系统建立了常用的虚拟控制器框架，并对控制器参数进行相关优化，提出了基于深度学习的控制器优化设计方案，可以在调参多次，进一步降低高原低回旋误差。
+文献[97]将设计的狭窄带滤波器升级为多分辨率和自适应信号处理，同时提出了基于多模式切换的控制器算法。
+文献[98]通过采用Q学习和策 略来设计仿真评估，并采用积分型策略来设计其控制方案，探究基于深度学习的控制器策略优化方法，并通过仿真实验来验证其有效性。
+文献[99]提出采用深度强化学习算法对飞行器控制问题进行求解，通过在仿真中学习到控制策略来提升飞行器控制性能。
+2.3 控制分配与路控制器
+在飞行器操控系统设计中，除了可能行的飞行状态基础外，控制器设计应采取多种策略，控制任务和飞行任务之间的匹配关系也不可忽视。
+对于保障飞行安全、提升飞行性能，有着非常重要的意义。
+对飞行器控制分配问题而言，无论是控制策略的协同还是控制器的协调都需要被分配到系统中。
+控制分配问题的关键在于确定各执行机构的控制量，同时考虑其限幅及相互作用等因素。
+对于传统的控制分配方法，其优点是实现简单、稳定性强，但在实际复杂工况下可能无法达到最优效果。
+另一方面，基于深度学习的控制分配方法可以利用数据驱动的方式，充分学习不同工况下的控制规律，从而实现更好的控制效果。
+参数设置及优化，完后发式优化算法能够应用于飞行器在线控制分配问题中，对于其他在线零行器具有一定的适应性。
+飞行器的路径控制问题也如何在飞行器发生故障时，充分利用飞行器备份的冗余来在控制系统中实现可靠性。
+在飞行器飞控系统中通过一次重构来实现控制器的切换，可以在发生故障时快速恢复飞行器的控制能力。
+文献[109]在飞行器在线控制系统设计中，采用改进的龙格库塔法来实现飞机控制律的计算，并利用高精度数值计算提高控制精度，结合多目标优化算法进行控制参数的优化，以实现更稳定的控制效果。
+在飞行器分配问题中，采用并联方式配合优化策略来完成任务，能够更好地提高控制可靠性和鲁棒性。
+针对控制分配问题提出了一种改进的多目标优化方法，该方法通过引入约束条件和鲁棒控制思想，使得控制分配能够适应不同工况，实现更好的控制效果。
+3 发展趋势与展望
+3.1 控制系统设计智能化
+当前人工智能技术发展迅速，深度学习、强化学习、深度强化学习等已应用于智能化方法或为它，。
+如何在保障疲躯体飞行安全的前提下，充分提升飞行器控制的可靠性、稳定性和精度，仍需要进一步研究。
+航 空 学 报
+3.1 基于元学习的智能控制
+拼并引入能有效提升控制器性能的智能方法，是未来研究的重要和难点。
+图5为一种基于元学习的变体飞行器蒲掠控制器设计框架。
+首先该方法通过基本控制要的名义控制量，在此基础上设计基于执行评估网络的控制器输出提升控制性能，同时采用元学习机制将网络参数调整，使训练数据和不同环境的适应能力。
+图5 基于元学习的变体飞行器蒲掠控制器设计
+3.2 变形控制与姿态控制一体化
+目前变体飞行器变形姿态控制系统设计的研究相对较少，但主要已有考虑变形控制与姿态控制的研究问题。
+实际，上变体飞行器的变形控制与姿态碍紧密相关，变形过程中产生的飞行器结构运动影响到姿态控制系统的设计，同时对变形过程要求也对姿态调整产生影响。
+此外，通过对结构运动的预测可以提升姿态控制精度。
+由于变形过程的非线性因素，姿态控制系统需要更强的鲁棒性，因此要在控制器设计中体现结构运动模型的影响，并与姿态控制系统联动实现一体化设计研究。
+3.3 集群化与协同控制
+集群系统协同控制技术是近年来受到广泛关注的技术。
+变体飞行器集群协同控制与其他集群系统相比具有更强的机动性，以及集群内个体的多样性，主要包括编队保持、协同避障、任务分配等关键问题。
+在飞行器集群协同控制中，变体飞行器集群协同控制与固定翼编队相比，需要更强的适应性和鲁棒性。
+为实现集群控制与协同控制的一体化，需在集群控制策略中体现变体飞行器变形带来的影响。
+图7 变体飞行器集群协同控制示意图
+4 论 述
+从变体飞行器变形决策技术、控制系统建模、姿态控制技术、控制分配与管控控制建立了4类问题提出了对变体飞行器控制技术的全面研究。
+其中，在变形决策技术方面，将基于仿真和实际变形数据进行训练来完成，变形行为轨迹等关键技术，形成了变形决策技术框架；
+在控制系统建模方面，对变体飞行器建模方法进行研究，对复杂系统的动态变化进行有效建模；
+在控制算法方面，结合控制策略设计，提出了变体飞行器控制算法，在试验中验证了控制效果。
+针对集群任务方面，本文将讨论变体飞行器协同控制的关键技术，为后续研究提供参考。
+527449-12
+航 空 学 报
+参考文献
+[1] AJAJ R M, JANKEE G K. The transformer aircraft: A multimission unmanned aerial vehicle capable of symmetric and asymmetric span morphing[J]. Aerospace Science and Technology, 2018, 76: 512-522.
+[2] AFONSO F, VALE J, LAU F, SULEMAN A. Performance based multidisciplinary design optimization of morphing aircraft[J]. Aerospace Science and Technology, 2017, 67: 1-12.
+[3] MCHAUD F, DALIR H, JONCAS S. Structural design and optimization of an aircraft morphing wing. Composite skin[J]. Journal of Aircraft, 2017, 55(1): 195-211.
+[4] AJAJ R M, BEVESTOCK C S, FRISWELL M I. Morphing aircraft: The need for a new design philosophy[J]. Aerospace Science and Technology, 2016, 49: 154-166.
+[5] 塑单，杨材，杨树姐，等. 基于Kalman滤波的变形飞翼 T-S模糊控制[J]. 航空学报，2020，41(52): 7242-7247.
+[6] 崔雅，贺元奎，张林飞，等. 航空器形态变换系统研究[J]. 航空学报, 2019, 40(7): 2429-2434.
+[7] 杨家淼，陈丰，鲁彤，等. 基于Karman-Lorenz展 开的分布式变体翼部器最优控制方法[J]. 航空学报, 2018, 39(2): 121518.
+[8] GONG C L, CHI F H, GU L X, et al. Optimal adaptive control for distributed morphing aircraft based on a huner-izce expansion[J]. Acta Aeronautica et Astronautica Sinica, 2018, 39(2): 121518.
+[9] CHEN Y C, SHEN X L J, et al. Thermal hysteresis identification and compensation based on the discrete Preisach model of an aircraft morphing wing device manip-ulated by an SMA actuator[J]. Chinese Journal of Aeronautics, 2019, 32(4): 1040-1050.
+[10] BAO C Y, WANG P, TANG G J. Integrated method of guidance, control and morphing for hypersonic morphing vehicle in glide phase[J]. Chinese Journal of Aeronautics, 2021, 34(5): 553-553.
+[11] 张康, 张燚, 刘健,等. 智能变体飞行器研究综述与发展分析[J]. 飞航导弹, 2021, 6: 14-23.
+[12] ZHANG Y, ZHANG W, BIE D W, et al. Research summary and development trend analysis of intelligent variable aircraft[J]. Aerodynamics Missile Journal, 2021(6): 14-23 (in Chinese).
+[13] KARSXEN M, MUJIERES F T, TDE WAGTER C, et al. A tainless aerial robotic flapper reveals that flies use torque coupling in rapid banked turns[J]. Science, 2018, 361(6407): 1089-1094.
+[14] RAMEZANIAN A, CHUNG S J, HUTCHINSON S. A biomimetic flapping platform to study flight specializations of insects[J]. Science Robotics, 2017, 2(3): eaal2501.
+[15] GANNET T G. A linear input-varying framework for modeling and control of morphing aircraft[J]. Gainesville: University of Florida, 2011.
+[16] JANIC E, FEROSKHAN M, MINTCHEV S, et al. Bioinspired wing and tail morphing extends drone flight capabilities[J]. Science Robotics, 2020, 5(47): eabc2897.
+[17] CHANG E, MATTOFL L Y. STOWERS A K, et al. Soft biohybrid morphing wings with feathers underactuated by wrist and finger motion[J]. Science Robotics, 2020, 5(38): eaay1246.
+[18] BARBARINA M R. et al. A review of morphing aircraft[J]. Journal of Intelligent Material Systems and Structures, 2011, 22(9): 823-877.
+[19] ZHANG A. et al. A review of morphing aircraft[J]. Aerospace Sciences, 2018, 100: 46-62.
+[20] CHU L L, LI Q, GU F et al. Design modeling and control of morphing aircraft: A review[J]. Chinese Journal of Aeronautics, 2022, 35(5): 220-246.
+[21] SEIGER T M. Dynamics and control of morphing aircraft[D]. Blacksburg: Virginia Polytechnic Institute and State University, 2005: 51-72.
+[22] 王育，刘伟华. 变形飞翼滑翔自主决策与控制[J]. 航空学报, 2020, 48(6): 5-11 (in Chinese).
+[23] SHI R Q, WANG W Y. Analysis of flight dynamics for large-scale morphing aircraft[J]. Aircraft Engineering and Aerospace Technology, 2015, 87(1): 384-384.
+[24] ABDULRAHIM M, LIND R. Control and simulation of a multi- rotor morphing micro air vehicle[J]. AIAA-2005-6481 [R]. Reston: AIAA, 2005.
+[25] CHEN X Y, LI C N, GONG C L, et al. A study of morphing aircraft on morphing rules along trajectory[J]. Chi-
+527449-13
+© 航空学报编辑部 http://hkxb.buaa.edu.cn
+航 空 学 报
+[25] LECUN Y, BENGIO Y, HINTON G. Deep Learning[J]. Nature, 2015, 521(7553): 436-444.
+[26] LITTMAN M L. Reinforcement learning improves behavior from evaluative feedback[J]. Nature, 2015, 521(7553): 445-451.
+[27] MINH V, KAVUKCUGOLU K, SILVER D, et al. Human-level control through deep reinforcement learning[J]. Nature, 2015, 518(7540): 529-533.
+[28] LILLICRAP T P, HUNT J J, PRITZEL A, et al. Continuous control with deep reinforcement learning[J/OL]. (2019-07-05)[2022-04-18]. https://arxiv.org/abs/1509. 02971.
+[29] SCHULMAN J, WOLSKI F, DHARIWAL P, et al. Proximal policy optimization algorithms[EB/OL]. (2017-08-28)[2022-04-18]. https://arxiv.org/abs/1707. 06347.
+[30] VALASEK J, TANDALE M D, RONG J. A reinforcement learning-adaptive control architecture for morphing aircraft[J]. Journal of Aerospace Computing, Informatics, Communication, 2005, 2(4): 174-195.
+[31] 雷威，李岸，邓勇，等. 基于滑翔翼的混合自适应连续控制策略[J]. 航空学报，2019，40(3): 656-663.
+YAN B B, LIY DAI P, et al. Adaptive wing morphing strategy and flight control method of a morphing aircraft based on reinforcement learning[J]. Journal of Northwestern Polytechnic University, 2019, 37(4): 656-663（in Chinese).
+[32] 谢静，邵正德，翁鹏等. 深度强化学习在奉体飞行器自主导航优化中的应用[J]. 可靠学报，2017，38(11): 1153-1159.
+WEN N, LIU Z H, ZHU L P, et al. Deep reinforcement learning and its application on autonomous shape optimization for morphing aircrafts[J]. Journal of Astronautics, 2017, 38(11): 1153-1159（in Chinese）.
+[33] 秦秀春，郭建龙，等. 基于DDPG的变体飞行器自主变形决策[J]. 北京航空航天大学学报，2022, 48(5): 910-919.
+SANG C, GUO J, TANG S J, et al. Autonomous deformation decision making of morphing aircraft based on DDPG algorithm[J]. Journal of Beijing University of Aeronautics and Astronautics, 2022, 48(5): 910-919（in Chinese）.
+[34] LI R, WANG Q, LIU Y A, et al. Morphing strategy design for UAV based on prioritized sweeping reinforcement learning[J]. IET Control: Theory and Applications, 2020, 14: 627-637.
+[35] XIA W, WANG H Z, ZHANG W. The optimal sweep angle design of a morphing firebee drone in a cruise mission[C]//2021 33rd Chinese Control and Decision Conference (CCC). Piscataway: IEEE Press, 2021: 5477-5477.
+[36] LAMPTOM A N, NIKSH A, VALASEK J. Reinforcement learning of morphing airfoils with aerodynamic and structural effects[J]. Journal of Aerospace Computing, Information and Communication, 2009, 6(1): 30-50.
+[37] LAMPTOM A N, NIKSH A, VALASEK J. Reinforcement learning of a morphing airfoil policy and discrete learning analysis: AIAA-2008-7281[R]. Reston: AIAA, 2008.
+[38] VALASEK K, DEOBBELER J, TANDALE M D, et al. Improved adaptive reinforcement learning control for morphing airfoils under varying [L]. IEEE Transactions on Cybernetics, 2021, 51(4): 1014-1020.
+[39] 闫鸣，陈斌，徐胜，等. 智能自变形飞行器关键技术及展望发展应用[J]. 空气动力学学报，2019, 37(3): 426-443.
+BAI P, CHEN Q, XU G W, et al. Development status of key technologies and expectation about smart morphing aircraf[J]. Acta Aerodynamica Sinica, 2019, 37(3): 426-443（in Chinese）.
+[40] NIKSCH A, VALASEK J. STRGANAC T, et al. Six degree-of-freedom/ hierarchical model of a morphing aircraft: AIAA-2009-5941[R]. Reston: AIAA, 2009.
+[41] OBROID A, SUBBARAO K. Modeling of dynamic localth-of-morphing-wing aircraft[J]. Journal of Aircraft, 2004, 41(9): 424-435.
+[42] 宋琦，王新亮，郑毅波. 变形翼结构的多相动力学特性研究[J]. 航空学报，2010, 31(4): 679-686.
+[43] 吕伟. DGAN I X, AI J Q. Longitudinal multibody dynamic characteristics of Z-wing morphing aircraft[J]. Acta Aeronautica et Astronautica Sinica, 2010, 31(4): 679-686（in Chinese）.
+[44] 何建中, 肖建军. 变体天线机器人的仿真与分析[J]. 第三十三届中国控制会议论文集（无锡），北京: 北京理工大学出版社，2014: 1095-1100.
+HE Z, LU Y P, ZHENG M M. Simulation and analysis of perching and movements for morphing UAVs[C]//Proceedings of 33rd Chinese Control Conference. Beijing: Chinese Association of Automation, 2014: 1091-1141（in Chinese）。
+527449-14
+© 航空学报编辑部 http://hkxb.buaa.edu.cn
+航空学报
+[45] DAI P, YAN B B, LIU R F, et al. Modeling and nonlin-
+ear model predictive control of a variable-sweep-wing mor-
+phing waverider[J]. IEEE Access, 2021, 9: 63610-
+63520.
+[46] GRAUER J A, HUBBARD J E. Multibody model of an
+ornithopter[J]. Journal of Guidance, Control, and Dy-
+namics, 2009, 32(5): 1675-1679.
+[47] SHI R Q, SONG J M. Modeling and control for an in-
+plane morphing wing[C]//Proceedings of the 10th World
+Congress on Intelligent Control and Automation. Piscat-
+away: IEEE Press, 2012: 1430-1435.
+[48] 莫国江. 杭数翼形气的动力学建模与飞行仿真[D].
+长安: [D]. 西北科技大学, 2015.
+[49] WANG X M, ZHOU W Y, MUR N J, et al. Modeling and
+simulation of mass-actuated flexible aircraft for roll control
+[J]. Aerospace Science and Technology, 2020, 106:
+102654.
+[50] 盛磊. 不对称变振翼气飞行器的气动特性与控制
+[D]. 合肥: 中国科学技术大学, 2013.
+[51] 张素英. 一种变翼式飞行器的动力学建模与动态特
+征分析[J]. 北京航空航天大学学报, 2015, 41(1):
+58-64.
+[52] GAO L, JIN H Z, ZHAO J, et al. Flight dynamics and con-
+trol of a novel catapult launched tandem wing morphing
+micro aerial vehicle with variable sweep[J]. IEEE Access,
+2016, 4: 42294-42308.
+[53] MA H, SONG B F, PEI Y, et al. Efficiency change of
+control surface of a biomimetic wing morphing UAV[J].
+IEEE Access, 2020, 8: 45627-45640.
+[54] SVOBODA F, HROMCIK M, HENGSTER-MOVRIC
+K. Distributed state feedback control for aerodynamic mor-
+phing wing flutter suppression[C]//2018 26th Mediterra-
+nean Conference on Control and Automation (MED). Pis-
+cataway: IEEE Press, 2018: 575-580.
+[55] MORAVANJ S H, SHAHVERDI H, AMOZGAR M. Parametric study on the dynamic aero-
+elastic analysis of a two-stage axially deploying telescopic
+wing[J]. Journal ofibration and Control. 2022,
+10775462210741.
+[56] MENON A N, CHAKRAVARTHY A, GRUENWALD
+B C, et al. Modeling and control of uncertain hybrid struc-
+ture flexible, morphing wings with stability and perform-
+ance guarantees: AIAA-2020-1078[R]. Reston: AIAA,
+2020.
+[57] 郝奕佑. 陈士峰. 弹性飞行器飞行动力学建模研究
+[J]. 空动船力学报, 2013, 31(4): 413-419, 436.
+[58] GUO D, XU M, CHEN S L. Research on flight dynamic
+modeling of highly flexible aircrafts[J]. Acta Aerodynam-
+ica Sinica. 2013, 31(4): 413-419, 436 (in Chinese).
+[59] 沈代勇. 大柔性飞行器结构与飞行动力学建模及建模
+分析[D]. 南京: 南京航空航天大学, 2016.
+SHEN H X. Structural, flight dynamic modeling and undam-
+bed analysis of very flexible aircraft[D]. Nanjing:
+Nanjing University of Aeronautics and Astronautics, 2016
+[60] 陈东. 变形翼翼飞行器气动力学问题研究[D]. 南
+京: 南京航空航天大学, 2012.
+GUO X. Flight dynamic studies of a flexible folding wing
+aircraft[D]. Nanjing: Nanjing University of Aeronautics
+and Astronautics, 2012 (in Chinese).
+[61] HUANG R, YU X H, ZHOU X H. Efficient nonlinear
+aeroservoelastic modeling for morphing wing with linear
+stiffness[J]. AIAA Journal, 2021, 60(5): 3135-3146.
+[62] 倪燕. 变体飞行器动力学建模及航迹控制[J]. 西
+安: 西北工业大学, 2014.
+[63] 杨宏. 气动弹性飞机的建模与控制研究[D]. 西
+安: 西北工业大学, 2017.
+[64] GOLDBERG R, LAVRETSKY E. Wise K. Very flexible
+aircraft control challenge problem: AIAA-2012-4973[R].
+Reston: AIAA, 2012.
+[65] KIM J K, HAN J H. A multibody approach for 6-DOF
+flight dynamics and stability analysis of the hawkmoth
+Manduca sexta[J]. Bioinspiration & Biomimetics, 2014,
+9(1): 016011.
+[66] 孙红. 王亚杰. 飞行器飞行动力学建模与国际案例仿真
+方法[J]. 北京理工大学学报, 2017, 37(12):
+1224-1228.
+[67] YANG Z Y, MENG Z. Modeling and simulation method for
+flexible wing aircraft[J]. Transactions of Beijing Institute
+of Technology, 2017, 37(12): 1224-1228 (in Chinese).
+[68] MEIROVITCH L, STEMPLE T. Hybrid equations of
+motion for flexible multibody systems using quasilinear
+natures[J]. Journal of Guidance, Control, and Dynamics,
+1995, 18(4): 678-688.
+[69] SHI R Q, SONG J M. Modeling and control for an in-
+527449-15
+© 航空学报编辑部 http://hkxb.buaa.edu.cn
+航 空 学 报
+plane morphing wing[C]//Proceedings of the 10th World
+Congress on Intelligent Control and Automation. Piscataway: IEEE Press, 2012: 1430-1435.
+[68] SHI R Q, SONG J M. Dynamics and control for an
+airplane morphing wing[J]. Aircraft Engineering and Aero-
+space Technology, 2013, 85(1): 24-31.
+[69] OKTAY T, COBAN S. Simultaneous longitudinal and
+lateral flight control systems design for both passive and
+active morphing UAVs[J]. Elektronika ir Elektrotechnika-
+nika, 2017, 23(3): 15-20.
+[70] NEAL D, ALKE B, HESSE T. Optimal flight control of
+an adaptive aircraft wing modeled by NeuroFuzzy tech-
+niques[C]//Proceedings of the 2003 IEEE International
+Symposium on Intelligent Control. Piscataway: IEEE
+Press, 2003, 364-370.
+[71] SVOBODA F, FROM C IK M, HENGSTER-MOVRIC
+K. Distributed state feedback control for aeroelastic mor-
+phing wing flutter suppression[C]//2018 26th Mediter-
+ranean Conference on Control and Automation (MED). Pis-
+cataway: IEEE Press, 2018: 575-580.
+[72] ABBASI S H, MAHMOOD A. Modeling simulation and
+control of a bio-inspired electromagnetic metamaterial for gust
+mitigation in flapping wing UAV[C]//2019 2nd Interna-
+tional Conference on Communication, Computing and Dig-
+ital Systems (CCODE). Piscataway: IEEE Press, 2019:
+195-200.
+[73] 王育, 王道, 黄奎南. 航空飞行器惯态滑动控制制
+导与故障跟踪应用[J]. 2015, 32(7): 249-254.
+[74] 许东林, 葛闻同, 王道, 等. 变结构飞行器适航控制
+与Lpv控制[J]. 系统工程与电子技术, 2015, 37(5): 3431-3433.
+[75] JIANG W L, DONG C Y, WANG T, et al. Continuous
+smooth switching LPV control for morphing aircraft[J].
+Systems Engineering and Electronics, 2017, 39(6): 1237-
+1343 (in Chinese).
+[76] 江未平, 崔育同, 王道, 等. 变结构飞行器弹性LPV鲁棒
+控制[J]. 控制与决策, 2016, 31(1): 66-72.
+[77] JIANG W L, DONG C Y, WANG T, et al. Smooth
+switching LPV robust control for morphing aircraft[J].
+Control and Decision, 2016, 31(1): 662-67 (in Chinese).
+[78] YANG H, LI W, WANG Q. H∞ control of switched
+systems with nominal switching and its application to
+morphing aircraft[J]. Procedia Engineering, 2013, 67:
+100-109.
+[79] 施朝平, 陶喜平, 高宏. 变系统代数LPV建模与鲁棒增益
+通过控制[J]. 南京航空航天大学学报, 2013, 45(2):
+202-208.
+YIN M. LI Y P, HE Z. LPV modeling and robust gain
+scheduling control of morphing aircraft[J]. Journal of
+Nanjiang University of Aeronautics & Astronautics, 2013,
+45(2): 202-208 (in Chinese).
+[80] SHAO P Y, WU J, WU C F, et al. Model and robust
+gain-scheduled PID control of a bio-inspired morphing
+UAV based on LPV method[J]. Asian Journal of Con-
+trol, 2019, 21(4): 1681-1705.
+[81] 吴小琳, 王富甫. 基于频域系统的变结构导引律设计
+自主路控制[J]. 北京航空航天大学学报, 2019, 45(3):
+538-545.
+[82] LIANG X H, WANG Q, DONG C Y. Robust adaptive
+control for morphing aircraft based on switching system
+[J]. Journal of Bifang University of Aeronautics and As-
+tronautics, 2019, 35(3): 538-545 (in Chinese).
+[83] 王泽亮, 龚朝明. 基于重构参数映射的变结构飞行器控制策略[J]. 现代工
+业技术研究, 2013, 35(6): 1-6.
+[84] WANG P, YANG H C, DONG C Y. Switching LPV
+control of morphing aircraft based on overlapped parame-
+ter area[J]. Journal of Shenyang University of Technology,
+2013, 35(6): 698-703 (in Chinese).
+[85] WEN N, LIU Z H, SUN Y, et al. Design of LPV-based
+sliding mode controller with finite time convergence for a
+morphing aircraft[J]. International Journal of Aerospac-
+Engineering, 2017, 2017: 8426348.
+[86] WU Q, LIU Z H, LIU F N, et al. LPV-based self-adap-
+tion integral sliding mode controller with gain perform-
+ance for a morphing aircraft[J]. IEEE Access, 7: 81515-
+81531.
+[87] YU X Z, HE Z. Filter-based sliding mode control for dis-
+tributed morphing wing structures[C]//2016 35th Chinese
+Control Conference (CCC). Piscataway: IEEE Press,
+527449-16
+© 航空学报编辑部 http://hkxb.buaa.edu.cn
+航空学报
+2016 · 1067-1072。
+[88] YUE T, ZHANG X Y, WANG L X, et al. Flight dynam- ics modeling and control for a telescopic wing morphing air- craft via asymmetric wing morphing [J]. Aerospace Sci- ence and Technology, 2017, 70: 328-338.
+[89] LIU J H, SHAN J Y, HU Y S, et al. Optimal switching control for morphing aircraft with aerodynamic uncertainty [C]//2020 IEEE 16th International Conference on Control & Automation. Piscataway: IEEE Press, 2020: 1167-1172.
+[90] GONG L G, WANG Q, DONG C Y. Disturbance rejec- tion control of morphing aircraft based on switched nonlin- ear systems [J]. Nonlinear Dynamics, 2019, 66(2): 975-995.
+[91] WU J I, ZHANG P X, WU H A. new control design for a morphing UAV based on disturbance observer and com- mand filtered backstepping techniques [J]. Science China Technological Sciences, 2019, 62(10): 1845-1853.
+[92] WU Z H, LU J C, RAJPUT J, et al. Adaptive neural control based on high order integral chained differential for morphing aircraft [J]. Mathematical Problems in Engi- neering, 2015, 2015: 789731.
+[93] WU Z H, LU J C, ZHOU Q. H. a modified adaptive neural dynamic surface control for morphing aircraft with input and output constraints [J]. Nonlinear Dynamics, 2017, 87(4): 2337-2358.
+[94] WU Z H, LU J C, SHAN P. H. Robust adaptive neural control of morphing aircraft with prescribed performance [J]. Mathematical Problems in Engineering, 2017, 2017: 1401427.
+[95] QIAO F X, SHI J P, QUX B, et al. Adaptive back-step- ping neural control for an embedded and tiltable V-1 morphing aircraft [J]. International Journal of Control Automation and Systems, 2022, 20(2): 678-690.
+[96] GONG L G, WANG Q, DONG C Y, et al. Prescribed performance control of morphing aircraft based on switched nonlinear systems and reinforcement learning [J]. Measurement and Control, 2019, 52(5-6): 608-624.
+[97] GONG L G, WANG Q, HU C H, et al. Switching con- trol of morphing aircraft based on Q-learning [J]. Chinese Journal of Aeronautics, 2020, 33(2): 672-687.
+[98] LEE H N, KIM S H, KIM Y H. Policy gradient-based inte- gral reinforcement learning for optimal control design of nonaffine morphing aircraft systems [C]//2020 28th Medi- terranean Conference on Control and Automation (MED). Piscataway: IEEE Press, 2020: 218-223.
+[99] KIM S H, LEE H N, KIM Y. Continuous-time determ- istic policy gradient-based controller for morphing aircraft without exploration [C]//2020 28th Mediterranean Con- ference on Control and Automation (MED). Piscataway:
+IEEE Press, 2020;
+224-229.
+[100] 李岩文, 贾欣然, 霍卫国, 等. 一种飞机包络线控制算法[J]. 飞行器测控学报, 2018, 28(1): 29-31, 35.
+LI G W, JIA QI L, ZHANG W G, et al. Gain scheduling method of aircraft control law in the large flight envelope [J]. Flight Dynamics, 2010, 28(1): 29-31, 35 (in Chi- nese).
+[101] RAN M P, LI J C, XIE L H. A new extended state ob- server for uncertain nonlinear systems [J]. Automatica, 2021, 131: 109772.
+[102] RAN M P, WANG Q, DONG C Y, et al. Active dis- turbance rejection control for uncertain time-delay nonlin- ear systems [J]. Automatica, 2020, 112: 108692.
+[103] RAN M P, WANG Q, DONG C Y. Active disturbance rejection control for uncertain nonaffine in-control nonlin- ear systems [J]. IEEE Transactions on Automatic Control, 2017, 62(11): 5830-5836.
+[104] RAN M P, ZIE L H. Adaptive observation-based effi- cient reinforcement learning for uncertain systems [J]. IEEE Transactions on Neural Networks and Learning Systems, 2021: 3070852.
+[105] LEE J, KIM Y. Neural network-based nonlinear dynam- ic inversion control of variable-span morphing aircraft [J]. Proceedings of the Institution of Mechanical Engi- neers, Part G: Journal of Aerospace Engineering, 2020, 234(10): 1620-1634.
+[106] 李海鹏, 雷文波, 周由华, 等. 基于神经网络的变形翼航迹跟踪控制方法[J]. 能源与动力工程学报, 2023, 45(7): 77-87.
+[107] 梁海洋, 李国强, 王军中, 等. Research on adap- tive control method of variable-sweep wing aircraft based on neural network [J]. Journal of Projectiles, Rockets, Missiles and Guidance, 2021, 41(5): 73-77, 85 (in Chi- nese).
+[108] 黄曾刚, 雷平, 王建军, 等. 基于抵等约束的分布式协同控制方法[J]. 控制理论与应用, 2018, 35(8): 1083-1091.
+[109] LU Y, DONG C Y, WANG Q, et al. Control allocation for distributed driving morphing aircraft based on eigen- standards[J]. Control Theory & Applications, 2018, 35(8): 1083-1091 (in Chinese).
+527449-17
+© 航空学报编辑部　http://xkbx.buaa.edu.cn
+Research status and future development of morphing aircraft control technology
+RAN Maopen1，*，WANG Chengcai1，2，LIU Huana1，WANG Wei1，2，Y U J unhu1
+1. School of Automation Science and Electrical Engineering，Beijing University，Beijing 100191，China
+2. China Academy of Electronics and Information Technology，Beijing 100041，China
+Abstract：Morphing aircraft can adapt to the complex environment and mission requirements by changing the aerodynamic shape of the deformed structure. It has high development potential and application value in military and civil fields. In this paper，the main research achievements and the latest research progress of the control technology of morphing aircraft are reviewed. Firstly，the background and significance of morphing aircraft control technology are briefly introduced. Secondly，the research results of deformation decision technology，control system modeling and attitude control technology are summarized and analyzed. Finally，the important research directions in the control technology of morphing aircraft are also discussed.
+Keywords：morphing aircraft control technology；
+deformation decision；
+control system modeling；
+attitude control
+Received：2022-05-16；
+Revised：2022-05-22；
+Accepted：2022-06-20；
+Published online：2022-06-28 17：45
+URL：https://hkxb.buaa.edu.cn/CN/Y2022/V43/I10/527449
+Foundation items：National Natural Science Foundation of China（61873295，61833016）；
+Beihang Young Top Talents Support Plan（YWF-22-L1205）
+* Corresponding author．E-mail：ranmp@buaa.edu.cn

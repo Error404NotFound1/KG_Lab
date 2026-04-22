@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>变构飞行器知识图谱应用</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f7f9fc; color: #222; }
+    .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+    h1 { margin-top: 0; }
+    ul { line-height: 1.8; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>变构飞行器知识图谱应用</h1>
+    <p>这是一个课程大作业应用骨架，当前已经接入图谱统计接口。</p>
+  </div>
+  <div class="card">
+    <h2>图谱统计</h2>
+    <ul>
+      <li>实体数：{{ stats.entities }}</li>
+      <li>关系数：{{ stats.relations }}</li>
+      <li>实体类型分布：{{ stats.entity_type_distribution }}</li>
+    </ul>
+  </div>
+</body>
+</html>
