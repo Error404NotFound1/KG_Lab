@@ -230,6 +230,17 @@
             align-items: center;
             margin-bottom: 0.8rem;
             font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .legend-item:hover {
+            opacity: 0.8;
+        }
+
+        .legend-item.disabled {
+            opacity: 0.3;
+            filter: grayscale(1);
         }
 
         .legend-color {
@@ -289,6 +300,33 @@
         .control-btn:hover, .control-btn.active {
             background: rgba(0, 212, 255, 0.2);
             border-color: var(--accent);
+        }
+        
+        .zoom-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(10, 14, 23, 0.7);
+            padding: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(5px);
+            z-index: 10;
+        }
+
+        .zoom-controls .control-btn {
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 8px;
         }
 
         /* Right Panel - Details */
@@ -461,6 +499,12 @@
         <!-- Center Panel: Graph -->
         <div class="glass-panel center-panel">
             <div id="graph-container"></div>
+            
+            <div class="zoom-controls">
+                <button class="control-btn" onclick="zoomGraph(1.2)" title="放大">+</button>
+                <button class="control-btn" onclick="zoomGraph(0.8)" title="缩小">-</button>
+            </div>
+            
             <div class="graph-controls">
                 <button class="control-btn active" onclick="loadGlobalGraph()">全局视图</button>
                 <button class="control-btn" id="subgraphBtn" style="display: none;">局部视图</button>
@@ -547,7 +591,10 @@
                 sortedTypes.forEach(([type, count]) => {
                     const color = typeColors[type] || '#fff';
                     const li = document.createElement('li');
-                    li.className = 'legend-item';
+                    const isConcept = type === 'Concept';
+                    li.className = isConcept ? 'legend-item disabled' : 'legend-item';
+                    li.setAttribute('onclick', `toggleLegend(this, '${type}')`);
+                    li.setAttribute('data-type', type);
                     li.innerHTML = `
                         <div class="legend-color" style="background-color: ${color}; color: ${color}"></div>
                         <span>${type}</span>
@@ -562,14 +609,37 @@
 
         // Render Graph
         function renderGraph(nodes, edges) {
+            // Build categories from typeColors
+            const categories = Object.keys(typeColors).map(type => ({
+                name: type,
+                itemStyle: { color: typeColors[type] }
+            }));
+
+            // Sync selected state from HTML legend
+            const selectedState = {};
+            document.querySelectorAll('.legend-item').forEach(li => {
+                const type = li.getAttribute('data-type');
+                if (type) {
+                    selectedState[type] = !li.classList.contains('disabled');
+                }
+            });
+
             const option = {
                 backgroundColor: 'transparent',
+                legend: [{
+                    show: false, // 隐藏底部原生图例，统一使用左侧图例
+                    data: categories.map(a => a.name),
+                    selected: selectedState
+                }],
                 tooltip: {
                     formatter: function (params) {
                         if (params.dataType === 'node') {
-                            return `<b>${params.data.name}</b><br/><span style="font-size:12px;color:#aaa">${params.data.value}</span>`;
+                            return `<b>${params.data.name}</b><br/>
+                                    <span style="font-size:12px;color:#aaa">类型: ${params.data.value}</span><br/>
+                                    <span style="font-size:12px;color:#00d4ff">连接度: ${params.data._degree || 1}</span>`;
                         } else {
-                            return `<b>${params.data._relation}</b><br/><span style="font-size:12px;color:#aaa">${params.data._evidence || ''}</span>`;
+                            return `<b>${params.data._relation}</b><br/>
+                                    <span style="font-size:12px;color:#aaa">${params.data._evidence || ''}</span>`;
                         }
                     }
                 },
@@ -578,30 +648,38 @@
                     layout: 'force',
                     nodes: nodes,
                     edges: edges,
+                    categories: categories,
                     roam: true,
                     label: {
                         position: 'right',
                         formatter: '{b}',
-                        color: 'rgba(255,255,255,0.8)'
+                        color: 'rgba(255,255,255,0.9)',
+                        textBorderColor: '#000',
+                        textBorderWidth: 2
                     },
                     force: {
-                        repulsion: 150,
-                        edgeLength: [50, 200],
-                        gravity: 0.1
+                        repulsion: 800,        // 适度提升斥力配合小体积节点
+                        edgeLength: [60, 200], // 恢复合理边长
+                        gravity: 0.1,          // 恢复正常的向心引力
+                        friction: 0.2
                     },
                     edgeSymbol: ['none', 'arrow'],
-                    edgeSymbolSize: [4, 8],
+                    edgeSymbolSize: [3, 6],
                     edgeLabel: {
                         fontSize: 10,
                         color: 'rgba(255,255,255,0.5)'
                     },
                     lineStyle: {
-                        color: 'source',
-                        curveness: 0.2
+                        color: 'source',       // 继承源节点的颜色
+                        curveness: 0.2,
+                        opacity: 0.15          // 默认透明度调低，降低视觉杂乱
                     },
                     emphasis: {
-                        focus: 'adjacency',
-                        lineStyle: { width: 3 }
+                        focus: 'adjacency',    // 鼠标悬停时高亮邻居节点和边
+                        lineStyle: { 
+                            width: 3,
+                            opacity: 1         // 悬停时边变清晰
+                        }
                     }
                 }]
             };
@@ -620,6 +698,11 @@
                 const res = await fetch('/api/graph/overview');
                 const data = await res.json();
                 renderGraph(data.nodes, data.edges);
+                
+                // 确保视图自适应
+                setTimeout(() => {
+                    chartInstance.dispatchAction({ type: 'restore' });
+                }, 100);
             } catch (e) {
                 console.error(e);
             } finally {
@@ -647,7 +730,7 @@
                 
                 // Adjust force parameters for smaller graph
                 const option = chartInstance.getOption();
-                option.series[0].force.repulsion = 300;
+                option.series[0].force.repulsion = 400;
                 option.series[0].force.edgeLength = [80, 150];
                 chartInstance.setOption(option);
                 
@@ -768,6 +851,32 @@
             searchResults.classList.remove('active');
             loadEntityDetail(id);
             loadSubgraph(id);
+        }
+
+        // Zoom Control
+        function zoomGraph(ratio) {
+            if (!chartInstance) return;
+            const currentOption = chartInstance.getOption();
+            let currentZoom = currentOption.series[0].zoom || 1;
+            chartInstance.setOption({
+                series: [{
+                    zoom: currentZoom * ratio
+                }]
+            });
+        }
+
+        // Toggle Custom Legend
+        function toggleLegend(elem, type) {
+            if (!chartInstance) return;
+            const isDisabled = elem.classList.contains('disabled');
+            
+            if (isDisabled) {
+                elem.classList.remove('disabled');
+                chartInstance.dispatchAction({ type: 'legendSelect', name: type });
+            } else {
+                elem.classList.add('disabled');
+                chartInstance.dispatchAction({ type: 'legendUnSelect', name: type });
+            }
         }
 
         // Init

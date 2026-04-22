@@ -159,6 +159,7 @@ def api_subgraph(entity_id: str, hops: int = Query(1, ge=1, le=2)):
             "id": n["id"],
             "name": n.get("name", n["id"]),
             "value": n.get("entity_type", "Concept"),
+            "category": n.get("entity_type", "Concept"),
             "symbolSize": 24 if n["id"] == entity_id else 14,
             "itemStyle": {
                 "color": TYPE_COLORS.get(n.get("entity_type", "Concept"), "#374151"),
@@ -185,41 +186,58 @@ def api_subgraph(entity_id: str, hops: int = Query(1, ge=1, le=2)):
 
 
 @app.get("/api/graph/overview")
-def api_graph_overview(limit: int = Query(300, ge=50, le=600)):
-    """全局图谱采样（防止节点过多卡顿），返回 ECharts Graph 格式"""
+def api_graph_overview(limit: int = Query(250, ge=50, le=600)):
+    """全局图谱采样（按核心度采样），返回带有层次感的 ECharts Graph 格式"""
     kg = load_kg()
 
-    # 优先保留非 Concept 类型节点，再随机补 Concept
-    priority = [n for n in kg["nodes"] if n.get("entity_type", "Concept") != "Concept"]
-    concept  = [n for n in kg["nodes"] if n.get("entity_type", "Concept") == "Concept"]
+    # 计算所有节点的连接度数
+    degrees = {}
+    for e in kg["edges"]:
+        degrees[e["source"]] = degrees.get(e["source"], 0) + 1
+        degrees[e["target"]] = degrees.get(e["target"], 0) + 1
 
-    import random
-    random.seed(42)
-    selected_nodes = priority[:limit]
-    if len(selected_nodes) < limit:
-        selected_nodes += random.sample(concept, min(limit - len(selected_nodes), len(concept)))
-
+    # 根据度数降序排列节点，优先保留核心节点
+    sorted_nodes = sorted(
+        kg["nodes"], 
+        key=lambda n: (degrees.get(n["id"], 0), n.get("entity_type", "Concept") != "Concept"), 
+        reverse=True
+    )
+    
+    selected_nodes = sorted_nodes[:limit]
     selected_ids = {n["id"] for n in selected_nodes}
+    
+    # 过滤出存在于被选节点间的边
     selected_edges = [
         e for e in kg["edges"]
         if e["source"] in selected_ids and e["target"] in selected_ids
-    ][:1500]
+    ]
 
-    echarts_nodes = [
-        {
+    import math
+    echarts_nodes = []
+    for n in selected_nodes:
+        deg = degrees.get(n["id"], 0)
+        # 根据度数计算节点大小，大幅缩小核心节点体积，防止遮挡
+        size = max(6, min(26, 6 + math.sqrt(deg) * 1.8))
+        
+        echarts_nodes.append({
             "id": n["id"],
             "name": n.get("name", n["id"]),
             "value": n.get("entity_type", "Concept"),
-            "symbolSize": 10,
+            "category": n.get("entity_type", "Concept"),
+            "symbolSize": size,
             "itemStyle": {"color": TYPE_COLORS.get(n.get("entity_type", "Concept"), "#374151")},
-        }
-        for n in selected_nodes
-    ]
+            # 核心节点（较大）默认显示标签
+            "label": {"show": size > 12, "fontSize": 10},
+            "_degree": deg
+        })
+
     echarts_edges = [
         {
             "source": e["source"],
             "target": e["target"],
             "_relation": e["relation"],
+            # 根据边的关联度，稍微降低普通边的透明度
+            "lineStyle": {"opacity": 0.15, "width": 1}
         }
         for e in selected_edges
     ]
@@ -270,4 +288,4 @@ def api_relations(
 
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="index.html")

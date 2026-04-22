@@ -465,49 +465,42 @@
 
 ### 已经落地的部分
 
-- `preprocess/extract.py`
-  - `PyMuPDF`
-  - `pdfminer.six`
-  - OpenAI 兼容视觉模型 OCR
-- `preprocess/clean.py`
-  - `re`
-  - `jieba`
-- `scripts/run_pipeline.py`
-  - 流程入口
+- **语料处理** (`preprocess/`)
+  - `PyMuPDF`, `pdfminer.six`, `OpenAI` 兼容视觉模型 OCR
+- **术语工程** (`terminology/`)
+  - `jieba`, `scikit-learn` (TF-IDF)
+  - 大模型 LLM 清洗与对齐
+- **实体与关系抽取** (`candidate_extraction/`)
+  - 多重约束的规则引擎（触发词黑名单、距离约束、类型约束）
+- **图数据库集成** (`kg/`, `docker/`)
+  - `Neo4j 5 Community` (Docker 部署)
+  - `neo4j` Python 驱动 (批量 MERGE 入库)
+- **Web 应用大屏** (`app/main.py`, `app/templates/`)
+  - `FastAPI` (后端接口)
+  - `ECharts 5` (力导向图可视化)
+  - `Particles.js` (星空特效)
+  - 原生 HTML/JS/CSS (暗黑玻璃拟态)
+- **流水线控制** (`scripts/run_pipeline.py`)
 
 ### 需要继续补齐的部分
 
-- `terminology/term_extraction.py`
-- `candidate_extraction/ner.py`
-- 关系抽取模块
-- `annotation/interop.py`
-- `kg/export.py`
-- `evaluation/metrics.py`
-- 应用层代码
+- **人工标注集构建** (手工流程)
+- **算法评估** (`evaluation/metrics.py`) 跑通 P/R/F1
 
 ---
 
 ## 7. 推荐实现优先级
 
-### 第一优先级
+### 已全面攻克的关键节点
+- [x] 术语与实体深度去噪
+- [x] 基于严格约束的关系抽取
+- [x] Docker Neo4j 部署与原生导入
+- [x] 炫酷交互图谱前端开发
 
-- 术语抽取
-- 规则实体识别
-- 规则关系抽取
-- 图谱数据生成
-
-### 第二优先级
-
-- 标注导入导出
-- 评估脚本
-- Neo4j 导入
-- 应用程序开发
-
-### 第三优先级
-
-- 模型增强
-- 界面优化
-- 查询增强
+### 当前最高优先级（最后一公里）
+- 导入人工标注 `gold` 集
+- 计算 P/R/F1 并分析误差
+- 录制最终项目答辩演示视频
 
 ---
 

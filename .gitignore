@@ -10,3 +10,9 @@ models/
 知识图谱构建数据集/*.pdf
 *.pdf 
 *.DS_*
+
+# 忽略庞大的原始数据和中间提取结果
+data/entities/*_raw.*
+data/relations/*_raw.*
+data/terminology/*_raw.*
+data/text/
