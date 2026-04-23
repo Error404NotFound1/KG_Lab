@@ -157,7 +157,60 @@ def run_kg(args):
 
 
 def run_evaluate(args):
-    print("评估阶段已就绪：请将人工标注金标准放入 data/annotations/ 后调用 evaluation.metrics 进行对比。")
+    import json
+    from evaluation.metrics import compute_entity_metrics, compute_relation_metrics
+    
+    print("=== 开始执行算法评估 ===")
+    
+    # 1. 加载预测数据
+    pred_ent_path = ROOT / "data" / "entities" / "entities_clean.jsonl"
+    pred_rel_path = ROOT / "data" / "relations" / "relations_clean.jsonl"
+    
+    # 2. 加载金标准数据
+    gold_ent_path = ROOT / "data" / "annotation" / "gold_entities.jsonl"
+    gold_rel_path = ROOT / "data" / "annotation" / "gold_relations.jsonl"
+    
+    if not gold_ent_path.exists() or not gold_rel_path.exists():
+        print("评估中止：未找到金标准数据集！请确保 data/annotation/ 下有 gold_entities.jsonl 和 gold_relations.jsonl")
+        return
+
+    def load_jsonl(path):
+        data = []
+        with open(path, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.strip(): data.append(json.loads(line))
+        return data
+        
+    y_pred_ent = load_jsonl(pred_ent_path)
+    y_pred_rel = load_jsonl(pred_rel_path)
+    y_true_ent = load_jsonl(gold_ent_path)
+    y_true_rel = load_jsonl(gold_rel_path)
+    
+    # 【修复核心逻辑】：由于机器预测的是整个语料库（10万+条），而金标准只标注了部分句子。
+    # 必须对预测集合进行过滤，仅保留那些“被人工抽样标注”的句子里的预测结果，否则准确率会永远接近0。
+    annotated_sentences_ent = set(f"{item['doc_id']}_{item['sentence_id']}" for item in y_true_ent)
+    annotated_sentences_rel = set(f"{item['doc_id']}_{item['sentence_id']}" for item in y_true_rel)
+    
+    y_pred_ent_filtered = [item for item in y_pred_ent if f"{item['doc_id']}_{item['sentence_id']}" in annotated_sentences_ent]
+    y_pred_rel_filtered = [item for item in y_pred_rel if f"{item['doc_id']}_{item['sentence_id']}" in annotated_sentences_rel]
+    
+    ent_metrics = compute_entity_metrics(y_true_ent, y_pred_ent_filtered)
+    rel_metrics = compute_relation_metrics(y_true_rel, y_pred_rel_filtered)
+    
+    print(f"\n【实体（概念）抽取算法评估结果】")
+    print(f"  - 真实实体集 (人工标注) : {len(y_true_ent)} 条")
+    print(f"  - 预测实体集 (标注句子内) : {len(y_pred_ent_filtered)} 条")
+    print(f"  - 准确率 (Precision)    : {ent_metrics['precision']:.2%}")
+    print(f"  - 召回率 (Recall)       : {ent_metrics['recall']:.2%}")
+    print(f"  - F1 分数              : {ent_metrics['f1']:.2%}")
+    
+    print(f"\n【关系（三元组）抽取算法评估结果】")
+    print(f"  - 真实关系集 (人工标注) : {len(y_true_rel)} 条")
+    print(f"  - 预测关系集 (标注句子内) : {len(y_pred_rel_filtered)} 条")
+    print(f"  - 准确率 (Precision)    : {rel_metrics['precision']:.2%}")
+    print(f"  - 召回率 (Recall)       : {rel_metrics['recall']:.2%}")
+    print(f"  - F1 分数              : {rel_metrics['f1']:.2%}")
+    print("\n评估完成。可将此结果写入你的大作业技术报告中！")
 
 
 STAGE_FUNCS = {
