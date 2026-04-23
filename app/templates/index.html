@@ -478,6 +478,14 @@
                     <div class="stat-value" id="stat-relations">0</div>
                     <div class="stat-label">知识关系</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-visible-entities" style="color: #00d4ff;">0</div>
+                    <div class="stat-label">显示节点</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-visible-relations" style="color: #00d4ff;">0</div>
+                    <div class="stat-label">显示关系</div>
+                </div>
             </div>
 
             <h2 class="panel-title">实体分布</h2>
@@ -547,7 +555,9 @@
         // App State
         let chartInstance = null;
         let typeColors = {};
-        let currentMode = 'global'; // 'global' or 'local'
+        let currentMode = 'global';
+        let currentNodes = [];   // 当前图中全部节点
+        let currentEdges = [];   // 当前图中全部边 // 'global' or 'local'
 
         // Initialize ECharts
         function initChart() {
@@ -607,8 +617,28 @@
             }
         }
 
+        // 根据图例显隐状态，实时更新"当前显示"计数
+        function updateVisibleStats() {
+            const hiddenTypes = new Set();
+            document.querySelectorAll('.legend-item.disabled').forEach(li => {
+                const t = li.getAttribute('data-type');
+                if (t) hiddenTypes.add(t);
+            });
+            const visNodes = currentNodes.filter(n => !hiddenTypes.has(n.category || n.value));
+            const visNodeIds = new Set(visNodes.map(n => n.id));
+            const visEdges = currentEdges.filter(e => {
+                const src = typeof e.source === 'object' ? e.source.id || e.source.name : e.source;
+                const tgt = typeof e.target === 'object' ? e.target.id || e.target.name : e.target;
+                return visNodeIds.has(src) && visNodeIds.has(tgt);
+            });
+            document.getElementById('stat-visible-entities').innerText = visNodes.length.toLocaleString();
+            document.getElementById('stat-visible-relations').innerText = visEdges.length.toLocaleString();
+        }
+
         // Render Graph
         function renderGraph(nodes, edges) {
+            currentNodes = nodes;
+            currentEdges = edges;
             // Build categories from typeColors
             const categories = Object.keys(typeColors).map(type => ({
                 name: type,
@@ -637,17 +667,20 @@
                             return `<b>${params.data.name}</b><br/>
                                     <span style="font-size:12px;color:#aaa">类型: ${params.data.value}</span><br/>
                                     <span style="font-size:12px;color:#00d4ff">连接度: ${params.data._degree || 1}</span>`;
-                        } else {
-                            return `<b>${params.data._relation}</b><br/>
-                                    <span style="font-size:12px;color:#aaa">${params.data._evidence || ''}</span>`;
                         }
+                        return '';  // 边不显示 tooltip
                     }
                 },
                 series: [{
                     type: 'graph',
                     layout: 'force',
                     nodes: nodes,
-                    edges: edges,
+                    // 为每条边禁用鼠标悬停和选中交互，只有节点才能被选中
+                    edges: edges.map(e => ({
+                        ...e,
+                        emphasis: { disabled: true },
+                        select: { disabled: true }
+                    })),
                     categories: categories,
                     roam: true,
                     label: {
@@ -658,10 +691,10 @@
                         textBorderWidth: 2
                     },
                     force: {
-                        repulsion: 800,        // 适度提升斥力配合小体积节点
-                        edgeLength: [60, 200], // 恢复合理边长
-                        gravity: 0.1,          // 恢复正常的向心引力
-                        friction: 0.2
+                        repulsion: 800,
+                        edgeLength: [60, 200],
+                        gravity: 0.1,
+                        friction: 0.5
                     },
                     edgeSymbol: ['none', 'arrow'],
                     edgeSymbolSize: [3, 6],
@@ -670,20 +703,21 @@
                         color: 'rgba(255,255,255,0.5)'
                     },
                     lineStyle: {
-                        color: 'source',       // 继承源节点的颜色
+                        color: 'source',
                         curveness: 0.2,
-                        opacity: 0.15          // 默认透明度调低，降低视觉杂乱
+                        opacity: 0.15
                     },
                     emphasis: {
-                        focus: 'adjacency',    // 鼠标悬停时高亮邻居节点和边
+                        focus: 'adjacency',
                         lineStyle: { 
                             width: 3,
-                            opacity: 1         // 悬停时边变清晰
+                            opacity: 1
                         }
                     }
                 }]
             };
             chartInstance.setOption(option);
+            updateVisibleStats();
         }
 
         // Load Global Graph
@@ -853,15 +887,27 @@
             loadSubgraph(id);
         }
 
-        // Zoom Control
         function zoomGraph(ratio) {
             if (!chartInstance) return;
-            const currentOption = chartInstance.getOption();
-            let currentZoom = currentOption.series[0].zoom || 1;
-            chartInstance.setOption({
-                series: [{
-                    zoom: currentZoom * ratio
-                }]
+            // 通过 zrender 内部事件系统直接触发 mousewheel
+            // 这和真实鼠标滚轮走的是完全相同的 RoamController 代码路径
+            const zr = chartInstance.getZr();
+            const cx = chartInstance.getWidth() / 2;
+            const cy = chartInstance.getHeight() / 2;
+            zr.trigger('mousewheel', {
+                type: 'mousewheel',
+                zrX: cx,
+                zrY: cy,
+                offsetX: cx,
+                offsetY: cy,
+                wheelDelta: ratio > 1 ? 120 : -120,
+                stop: function() {},
+                event: {
+                    preventDefault: function() {},
+                    stopPropagation: function() {},
+                    stopImmediatePropagation: function() {},
+                    deltaY: ratio > 1 ? -120 : 120
+                }
             });
         }
 
@@ -877,6 +923,7 @@
                 elem.classList.add('disabled');
                 chartInstance.dispatchAction({ type: 'legendUnSelect', name: type });
             }
+            updateVisibleStats();
         }
 
         // Init

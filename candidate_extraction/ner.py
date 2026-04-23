@@ -20,7 +20,13 @@ TRIGGER_WORDS = {
 
 
 def load_terms(term_file: str | Path | None = None) -> list[dict]:
-    path = Path(term_file) if term_file else TERMS_DIR / "terms_clean.csv"
+    if term_file:
+        path = Path(term_file)
+    else:
+        path = TERMS_DIR / "terms_final.csv"
+        if not path.exists():
+            path = TERMS_DIR / "terms_clean.csv"
+
     if not path.exists():
         raise FileNotFoundError(f"术语文件不存在: {path}")
     import csv

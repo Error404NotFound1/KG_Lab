@@ -186,7 +186,7 @@ def api_subgraph(entity_id: str, hops: int = Query(1, ge=1, le=2)):
 
 
 @app.get("/api/graph/overview")
-def api_graph_overview(limit: int = Query(250, ge=50, le=600)):
+def api_graph_overview(limit: int = Query(2000, ge=50, le=5000)):
     """全局图谱采样（按核心度采样），返回带有层次感的 ECharts Graph 格式"""
     kg = load_kg()
 

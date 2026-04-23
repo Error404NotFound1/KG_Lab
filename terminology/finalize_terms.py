@@ -208,6 +208,11 @@ def finalize_terms(
             discarded_count += 1
             continue
 
+        # 3h. 致命 Bug 修复：如果大模型清洗过了，但该词没在大模型的输出白名单里，说明被大模型判定为垃圾(keep=N)，直接丢弃！
+        if llm_override and term not in llm_override:
+            discarded_count += 1
+            continue
+
         # ── 合并 LLM 的 entity_type / alias
         current_type = (row.get("entity_type") or "Concept").strip() or "Concept"
         current_alias = (row.get("alias") or "").strip()

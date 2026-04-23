@@ -84,8 +84,11 @@ def run_terms(args):
     print(json.dumps({key: str(value) for key, value in outputs.items()}, ensure_ascii=False, indent=2))
 
 def run_finalize(args):
+    from terminology.llm_clean import clean_terms_with_llm
     from terminology.finalize_terms import finalize_terms
 
+    print("开始调用 LLM 进行全量智能清洗（可能需要几分钟，请耐心等待）...")
+    clean_terms_with_llm()
     outputs = finalize_terms()
     print("术语表定稿完成：")
     for key, path in outputs.items():
@@ -95,12 +98,9 @@ def run_finalize(args):
 def run_extract(args):
     """全量 NER：对所有句子重新跑实体识别。耗时长，只在语料变化时使用。"""
     from candidate_extraction.ner import predict_corpus
-    from candidate_extraction.relation import predict_relations
 
     raw_ent, clean_ent = predict_corpus()
     print(f"实体抽取完成: raw={raw_ent}, clean={clean_ent}")
-    raw_rel, clean_rel = predict_relations(entities_path=clean_ent)
-    print(f"关系抽取完成: raw={raw_rel}, clean={clean_rel}")
 
 
 def run_clean(args):
