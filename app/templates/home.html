@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知识图谱平台</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0e17;--glass:rgba(16,22,38,0.65);--border:rgba(0,212,255,0.18);--accent:#00d4ff;--glow:0 0 18px rgba(0,212,255,0.45);--text:#e2e8f0;--muted:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+/* animated bg */
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(0,212,255,0.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(124,58,237,0.06) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+header{padding:1.6rem 2.5rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);backdrop-filter:blur(10px);position:sticky;top:0;z-index:100;background:rgba(10,14,23,0.85)}
+.logo{font-family:'Orbitron',sans-serif;font-size:1.4rem;font-weight:700;color:var(--accent);text-shadow:var(--glow);display:flex;align-items:center;gap:10px}
+.logo-dot{width:20px;height:20px;background:radial-gradient(circle,var(--accent) 30%,transparent 80%);border-radius:50%;box-shadow:var(--glow);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.2);opacity:.7}}
+.btn{padding:.6rem 1.4rem;border-radius:20px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:.9rem;font-weight:600;transition:all .25s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff;box-shadow:0 4px 15px rgba(0,212,255,0.3)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,212,255,0.5)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-danger{background:transparent;border:1px solid rgba(239,68,68,0.4);color:#ef4444}
+.btn-danger:hover{background:rgba(239,68,68,0.1)}
+
+main{max-width:1280px;margin:0 auto;padding:2.5rem}
+.page-title{font-size:2rem;font-weight:800;margin-bottom:.4rem}
+.page-title span{background:linear-gradient(90deg,var(--accent),#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.page-sub{color:var(--muted);font-size:.95rem;margin-bottom:2.5rem}
+
+/* 图谱卡片网格 */
+.graph-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.6rem}
+.graph-card{background:var(--glass);border:1px solid var(--border);border-radius:18px;padding:1.6rem;backdrop-filter:blur(12px);cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.graph-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,212,255,0.04),transparent);opacity:0;transition:opacity .3s}
+.graph-card:hover{transform:translateY(-4px);border-color:rgba(0,212,255,0.5);box-shadow:0 12px 40px rgba(0,212,255,0.15)}
+.graph-card:hover::before{opacity:1}
+.card-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;margin-bottom:1rem;background:linear-gradient(135deg,rgba(0,212,255,0.2),rgba(124,58,237,0.2));border:1px solid var(--border)}
+.card-name{font-size:1.15rem;font-weight:700;margin-bottom:.4rem;color:#fff}
+.card-desc{font-size:.85rem;color:var(--muted);margin-bottom:1.2rem;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-meta{display:flex;gap:.8rem;flex-wrap:wrap}
+.meta-chip{font-size:.75rem;padding:.25rem .7rem;border-radius:10px;background:rgba(255,255,255,0.06);color:var(--muted);border:1px solid rgba(255,255,255,0.08)}
+.meta-chip.highlight{color:var(--accent);border-color:rgba(0,212,255,0.25);background:rgba(0,212,255,0.08)}
+.card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:1.2rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,0.06)}
+.status-badge{font-size:.72rem;padding:.2rem .7rem;border-radius:8px;font-weight:600}
+.status-ready{background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3)}
+.status-processing{background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);animation:blink 1.5s ease-in-out infinite}
+.status-empty{background:rgba(148,163,184,0.1);color:var(--muted);border:1px solid rgba(148,163,184,0.2)}
+.status-error{background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.3)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.5}}
+.card-actions{display:flex;gap:.5rem}
+
+/* 新建卡片 */
+.new-card{border:2px dashed rgba(0,212,255,0.25);background:rgba(0,212,255,0.03);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.8rem;min-height:220px;color:var(--muted);transition:all .25s}
+.new-card:hover{border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,0.06);transform:translateY(-4px)}
+.new-icon{font-size:2.5rem;font-weight:200}
+.new-label{font-size:.95rem;font-weight:600}
+
+/* 弹窗 */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);z-index:500;display:none;align-items:center;justify-content:center}
+.modal-backdrop.open{display:flex}
+.modal{background:#0f1629;border:1px solid var(--border);border-radius:20px;padding:2rem;width:520px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.6)}
+.modal-title{font-size:1.3rem;font-weight:700;margin-bottom:1.5rem;color:#fff}
+.form-group{margin-bottom:1.2rem}
+.form-label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:.5rem;font-weight:500}
+.form-input{width:100%;padding:.75rem 1rem;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:.9rem;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--accent)}
+textarea.form-input{resize:vertical;min-height:80px}
+
+/* 上传区 */
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;background:rgba(255,255,255,0.02)}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:rgba(0,212,255,0.05)}
+.upload-zone input[type=file]{display:none}
+.upload-icon{font-size:2rem;margin-bottom:.5rem;opacity:.5}
+.upload-hint{font-size:.8rem;color:var(--muted)}
+.file-list{margin-top:.8rem;display:flex;flex-direction:column;gap:.4rem}
+.file-item{display:flex;align-items:center;gap:.6rem;font-size:.82rem;background:rgba(255,255,255,0.04);padding:.4rem .8rem;border-radius:8px;color:var(--muted)}
+.file-item::before{content:'📄';font-size:.9rem}
+
+.modal-actions{display:flex;gap:.8rem;justify-content:flex-end;margin-top:1.5rem}
+
+/* 空状态 */
+.empty-state{text-align:center;padding:5rem 2rem;color:var(--muted)}
+.empty-state .emoji{font-size:3.5rem;margin-bottom:1rem}
+.empty-state h3{font-size:1.3rem;color:var(--text);margin-bottom:.5rem}
+
+/* Toast */
+.toast{position:fixed;bottom:2rem;right:2rem;background:#1a2440;border:1px solid var(--border);border-radius:12px;padding:.9rem 1.4rem;font-size:.9rem;z-index:999;transform:translateY(100px);opacity:0;transition:all .3s;max-width:340px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{border-color:rgba(16,185,129,0.5);color:#10b981}
+.toast.error{border-color:rgba(239,68,68,0.5);color:#ef4444}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><div class="logo-dot"></div>KG STUDIO</div>
+  <button class="btn btn-primary" onclick="openCreateModal()">＋ 新建图谱</button>
+</header>
+
+<main>
+  <h1 class="page-title"><span>我的知识图谱</span></h1>
+  <p class="page-sub">管理和探索你的所有领域知识图谱</p>
+  <div class="graph-grid" id="graphGrid">
+    <div class="graph-card new-card" onclick="openCreateModal()">
+      <div class="new-icon">＋</div>
+      <div class="new-label">新建知识图谱</div>
+    </div>
+  </div>
+</main>
+
+<!-- 新建弹窗 -->
+<div class="modal-backdrop" id="createModal">
+  <div class="modal">
+    <div class="modal-title">📚 新建知识图谱</div>
+    <div class="form-group">
+      <label class="form-label">图谱名称 *</label>
+      <input class="form-input" id="graphName" placeholder="例如：变构飞行器知识图谱" maxlength="50">
+    </div>
+    <div class="form-group">
+      <label class="form-label">描述（可选）</label>
+      <textarea class="form-input" id="graphDesc" placeholder="简要描述这个图谱的领域和用途..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">上传文档（可选，支持 PDF）</label>
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()"
+           ondragover="onDragOver(event)" ondrop="onDrop(event)" ondragleave="onDragLeave(event)">
+        <input type="file" id="fileInput" multiple accept=".pdf" onchange="onFileChange(event)">
+        <div class="upload-icon">📂</div>
+        <div>点击或拖拽文件到此处</div>
+        <div class="upload-hint">支持 PDF 文件，可多选，上传后自动提取实体与关系</div>
+      </div>
+      <div class="file-list" id="fileList"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeCreateModal()">取消</button>
+      <button class="btn btn-primary" id="createBtn" onclick="createGraph()">创建图谱</button>
+    </div>
+  </div>
+</div>
+
+<!-- 删除确认弹窗 -->
+<div class="modal-backdrop" id="deleteModal">
+  <div class="modal" style="width:400px">
+    <div class="modal-title" style="color:#ef4444">⚠️ 确认删除</div>
+    <div class="form-group" style="color:var(--muted);line-height:1.6" id="deleteMsg">
+      确认要删除这个图谱吗？此操作不可恢复。
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="document.getElementById('deleteModal').classList.remove('open')">取消</button>
+      <button class="btn btn-danger" id="confirmDeleteBtn" style="background:#ef4444;color:#fff" onclick="executeDelete()">确定删除</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let selectedFiles = [];
+
+// ─── 加载图谱列表
+async function loadGraphs() {
+  const res = await fetch('/api/graphs');
+  const graphs = await res.json();
+  renderGrid(graphs);
+}
+
+function renderGrid(graphs) {
+  const grid = document.getElementById('graphGrid');
+  const newCard = `
+    <div class="graph-card new-card" onclick="openCreateModal()">
+      <div class="new-icon">＋</div>
+      <div class="new-label">新建知识图谱</div>
+    </div>`;
+
+  if (!graphs.length) {
+    grid.innerHTML = newCard;
+    return;
+  }
+
+  const cards = graphs.map(g => {
+    const statusMap = {
+      ready: ['status-ready', '✅ 就绪'],
+      processing: ['status-processing', '⚙️ 处理中'],
+      empty: ['status-empty', '○ 空图谱'],
+      error: ['status-error', '✗ 出错'],
+    };
+    const [cls, label] = statusMap[g.status] || ['status-empty', '未知'];
+    const updated = g.updated_at ? new Date(g.updated_at).toLocaleString('zh-CN') : '';
+    return `
+      <div class="graph-card" onclick="openGraph('${g.id}')">
+        <div class="card-icon">🌐</div>
+        <div class="card-name">${escHtml(g.name)}</div>
+        <div class="card-desc">${escHtml(g.description || '暂无描述')}</div>
+        <div class="card-meta">
+          <span class="meta-chip highlight">📄 ${g.doc_count || 0} 篇文档</span>
+          <span class="meta-chip highlight">⬡ ${(g.entity_count || 0).toLocaleString()} 实体</span>
+          <span class="meta-chip highlight">↔ ${(g.relation_count || 0).toLocaleString()} 关系</span>
+        </div>
+        <div class="card-footer">
+          <span class="status-badge ${cls}">${label}</span>
+          <button style="position:relative;z-index:10;background:transparent;border:1px solid rgba(239,68,68,0.35);color:#ef4444;border-radius:8px;padding:.25rem .7rem;font-size:.76rem;cursor:pointer;transition:all .2s"
+                  onmouseenter="this.style.background='rgba(239,68,68,0.12)'"
+                  onmouseleave="this.style.background='transparent'"
+                  onclick="event.stopPropagation();event.preventDefault();deleteGraph('${g.id}','${escHtml(g.name)}')">
+            删除
+          </button>
+        </div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:.6rem">${updated}</div>
+      </div>`;
+  }).join('');
+
+  grid.innerHTML = cards + newCard;
+
+  // 如果有处理中的图谱，定时刷新
+  if (graphs.some(g => g.status === 'processing')) {
+    setTimeout(loadGraphs, 4000);
+  }
+}
+
+function openGraph(id) { window.location.href = `/graph/${id}`; }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ─── 新建弹窗
+function openCreateModal() {
+  document.getElementById('createModal').classList.add('open');
+  document.getElementById('graphName').focus();
+}
+function closeCreateModal() {
+  document.getElementById('createModal').classList.remove('open');
+  selectedFiles = [];
+  document.getElementById('fileList').innerHTML = '';
+  document.getElementById('graphName').value = '';
+  document.getElementById('graphDesc').value = '';
+  document.getElementById('fileInput').value = '';
+}
+
+// ─── 文件上传
+function onFileChange(e) { addFiles(Array.from(e.target.files)); }
+function onDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('dragover'); }
+function onDragLeave(e) { e.currentTarget.classList.remove('dragover'); }
+function onDrop(e) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('dragover');
+  addFiles(Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.pdf')));
+}
+function addFiles(newFiles) {
+  selectedFiles = [...selectedFiles, ...newFiles];
+  renderFileList();
+}
+function renderFileList() {
+  const fl = document.getElementById('fileList');
+  fl.innerHTML = selectedFiles.map((f, i) =>
+    `<div class="file-item"><span style="flex:1">${escHtml(f.name)}</span>
+     <span style="color:var(--muted);font-size:.75rem">${(f.size/1024/1024).toFixed(1)} MB</span>
+     <span style="cursor:pointer;color:#ef4444;margin-left:.5rem" onclick="removeFile(${i})">✕</span></div>`
+  ).join('');
+}
+function removeFile(i) { selectedFiles.splice(i, 1); renderFileList(); }
+
+// ─── 创建图谱
+async function createGraph() {
+  const name = document.getElementById('graphName').value.trim();
+  if (!name) { showToast('请填写图谱名称', 'error'); return; }
+
+  const btn = document.getElementById('createBtn');
+  btn.disabled = true; btn.textContent = '创建中...';
+
+  const fd = new FormData();
+  fd.append('name', name);
+  fd.append('description', document.getElementById('graphDesc').value.trim());
+  selectedFiles.forEach(f => fd.append('files', f));
+
+  try {
+    const res = await fetch('/api/graphs', { method: 'POST', body: fd });
+    if (!res.ok) throw new Error(await res.text());
+    closeCreateModal();
+    showToast(selectedFiles.length ? '图谱已创建，正在后台处理文档...' : '图谱已创建！', 'success');
+    loadGraphs();
+  } catch(e) {
+    showToast('创建失败: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '创建图谱';
+  }
+}
+
+// ─── 删除图谱
+let pendingDeleteId = null;
+
+function deleteGraph(id, name) {
+  pendingDeleteId = id;
+  document.getElementById('deleteMsg').innerHTML = `确认删除图谱 <strong>${name}</strong> 吗？<br>删除后不可恢复。`;
+  document.getElementById('deleteModal').classList.add('open');
+}
+
+async function executeDelete() {
+  if (!pendingDeleteId) return;
+  const btn = document.getElementById('confirmDeleteBtn');
+  btn.disabled = true;
+  btn.textContent = '删除中...';
+  
+  try {
+    const res = await fetch(`/api/graphs/${pendingDeleteId}`, { method: 'DELETE' });
+    if (res.ok) { 
+      showToast('已删除', 'success'); 
+      loadGraphs(); 
+    } else {
+      showToast('删除失败', 'error');
+    }
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '确定删除';
+    document.getElementById('deleteModal').classList.remove('open');
+    pendingDeleteId = null;
+  }
+}
+
+// ─── Toast
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── 初始化
+loadGraphs();
+
+// 点击背景关闭弹窗
+document.getElementById('createModal').addEventListener('click', function(e) {
+  if (e.target === this) closeCreateModal();
+});
+</script>
+</body>
+</html>

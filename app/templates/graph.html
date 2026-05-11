@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>知识图谱 — KG Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+:root{--bg:#0a0e17;--glass:rgba(16,22,38,0.65);--border:rgba(0,212,255,0.18);--accent:#00d4ff;--glow:0 0 18px rgba(0,212,255,0.45);--text:#e2e8f0;--muted:#94a3b8}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 20% 20%,rgba(0,212,255,0.05) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(124,58,237,0.05) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+header{padding:1rem 2rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);background:rgba(10,14,23,0.9);z-index:10;flex-shrink:0}
+.back-btn{display:flex;align-items:center;gap:.5rem;color:var(--muted);cursor:pointer;text-decoration:none;font-size:.9rem;transition:color .2s}
+.back-btn:hover{color:var(--accent)}
+.logo{font-family:'Orbitron',sans-serif;font-size:1.1rem;font-weight:700;color:var(--accent);text-shadow:var(--glow)}
+.graph-name{font-size:1rem;font-weight:600;color:#fff;max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.header-right{display:flex;align-items:center;gap:1rem}
+.search-wrap{position:relative;width:260px}
+.search-wrap input{width:100%;padding:.6rem 1rem .6rem 2.2rem;border-radius:16px;background:var(--glass);border:1px solid var(--border);color:var(--text);outline:none;font-size:.88rem;backdrop-filter:blur(8px);transition:border-color .2s}
+.search-wrap input:focus{border-color:var(--accent)}
+.search-wrap::before{content:'🔍';position:absolute;left:.7rem;top:50%;transform:translateY(-50%);font-size:.8rem;pointer-events:none}
+.search-results{position:absolute;top:110%;left:0;width:100%;background:rgba(10,14,23,0.97);border:1px solid var(--border);border-radius:12px;max-height:280px;overflow-y:auto;display:none;z-index:200}
+.search-results.open{display:block}
+.s-item{padding:.7rem 1rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,0.04);font-size:.85rem;transition:background .15s}
+.s-item:hover{background:rgba(0,212,255,0.08)}
+.s-badge{font-size:.7rem;padding:.15rem .5rem;border-radius:8px;background:rgba(255,255,255,0.08);color:var(--muted)}
+
+.btn{padding:.55rem 1.2rem;border-radius:16px;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:.85rem;font-weight:600;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#7c3aed);color:#fff}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(0,212,255,0.3)}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--text)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+
+.container{display:flex;flex:1;padding:1.2rem 1.5rem;gap:1.2rem;overflow:hidden;z-index:1}
+.glass-panel{background:var(--glass);border:1px solid var(--border);border-radius:14px;backdrop-filter:blur(12px);padding:1.2rem;display:flex;flex-direction:column}
+.panel-title{font-family:'Orbitron',sans-serif;font-size:.85rem;color:var(--accent);text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid var(--border);padding-bottom:.6rem;margin-bottom:1rem;flex-shrink:0}
+
+/* Left */
+.left-panel{flex:0 0 260px;overflow-y:auto;gap:.5rem}
+.left-panel::-webkit-scrollbar{width:3px}
+.left-panel::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:3px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:1rem}
+.stat-card{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:.8rem;text-align:center;transition:all .2s}
+.stat-card:hover{border-color:rgba(0,212,255,0.3);background:rgba(0,212,255,0.04)}
+.stat-val{font-size:1.4rem;font-weight:800;font-family:'Orbitron',sans-serif;background:linear-gradient(90deg,#fff,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-lbl{font-size:.72rem;color:var(--muted);margin-top:.3rem}
+.legend-item{display:flex;align-items:center;gap:.6rem;padding:.4rem .2rem;font-size:.82rem;cursor:pointer;border-radius:6px;transition:all .2s}
+.legend-item:hover{background:rgba(255,255,255,0.04)}
+.legend-item.off{opacity:.3;filter:grayscale(1)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.legend-cnt{margin-left:auto;font-size:.72rem;color:var(--muted);background:rgba(255,255,255,0.06);padding:.1rem .45rem;border-radius:8px}
+
+/* Upload section */
+.upload-zone{border:1px dashed rgba(0,212,255,0.25);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;font-size:.8rem;color:var(--muted);transition:all .2s;margin-top:.5rem}
+.upload-zone:hover{border-color:var(--accent);color:var(--accent)}
+.upload-zone input{display:none}
+
+/* Center */
+.center-panel{flex:1;position:relative;padding:0;overflow:hidden}
+#graph-container{width:100%;height:100%}
+.graph-controls{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);display:flex;gap:.5rem;background:rgba(10,14,23,0.75);padding:.5rem 1rem;border-radius:16px;border:1px solid var(--border);backdrop-filter:blur(5px)}
+.ctrl-btn{background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--text);padding:.3rem .9rem;border-radius:12px;cursor:pointer;font-size:.82rem;transition:all .2s}
+.ctrl-btn:hover,.ctrl-btn.active{background:rgba(0,212,255,0.15);border-color:var(--accent);color:var(--accent)}
+.zoom-panel{position:absolute;top:14px;right:14px;display:flex;flex-direction:column;gap:.4rem;background:rgba(10,14,23,0.75);padding:.5rem;border-radius:10px;border:1px solid var(--border)}
+.z-btn{width:30px;height:30px;background:transparent;border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:7px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.z-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* Right */
+.right-panel{flex:0 0 320px;overflow-y:auto;transition:all .3s}
+.right-panel::-webkit-scrollbar{width:3px}
+.right-panel::-webkit-scrollbar-thumb{background:rgba(0,212,255,0.3);border-radius:3px}
+.entity-name{font-size:1.25rem;font-weight:700;color:#fff;margin-bottom:.5rem}
+.entity-type{display:inline-block;padding:.2rem .7rem;border-radius:10px;font-size:.75rem;font-weight:600;background:rgba(255,255,255,0.08)}
+.section{margin-bottom:1.2rem}
+.section h4{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:.6rem}
+.rel-item{background:rgba(255,255,255,0.03);border-left:2px solid var(--accent);padding:.65rem .8rem;margin-bottom:.4rem;border-radius:0 8px 8px 0;font-size:.83rem;cursor:pointer;transition:background .2s}
+.rel-item:hover{background:rgba(255,255,255,0.06)}
+.rel-label{color:var(--accent);font-size:.75rem;margin-bottom:3px}
+.rel-evidence{font-size:.72rem;color:var(--muted);margin-top:.3rem;font-style:italic;border-top:1px dashed rgba(255,255,255,0.08);padding-top:.3rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.placeholder{color:var(--muted);text-align:center;margin-top:3rem;font-size:.9rem;line-height:1.8}
+
+/* Loading */
+#loading{position:fixed;inset:0;background:rgba(10,14,23,0.85);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;backdrop-filter:blur(4px)}
+.spinner{width:44px;height:44px;border:3px solid rgba(0,212,255,0.25);border-radius:50%;border-top-color:var(--accent);animation:spin 1s linear infinite}
+.loading-text{color:var(--muted);font-size:.9rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Status bar */
+.status-bar{position:absolute;top:14px;left:14px;font-size:.75rem;color:var(--muted);background:rgba(10,14,23,0.7);padding:.3rem .8rem;border-radius:8px;border:1px solid var(--border)}
+.processing-banner{background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);border-radius:10px;padding:.7rem 1rem;font-size:.82rem;color:#f59e0b;display:flex;align-items:center;gap:.5rem;margin-bottom:1rem}
+
+/* Toast */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:#1a2440;border:1px solid var(--border);border-radius:10px;padding:.8rem 1.2rem;font-size:.85rem;z-index:998;transform:translateY(80px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-color:rgba(16,185,129,0.5);color:#10b981}
+.toast.err{border-color:rgba(239,68,68,0.5);color:#ef4444}
+</style>
+</head>
+<body>
+<header>
+  <div style="display:flex;align-items:center;gap:1.2rem">
+    <a class="back-btn" href="/"><span>←</span><span>图谱列表</span></a>
+    <div style="width:1px;height:20px;background:var(--border)"></div>
+    <div class="logo">KG STUDIO</div>
+    <div class="graph-name" id="graphNameHeader">加载中...</div>
+  </div>
+  <div class="header-right">
+    <div class="search-wrap">
+      <input id="searchInput" placeholder="搜索实体..." oninput="onSearch(this.value)" onfocus="showResults()" onblur="setTimeout(hideResults,200)">
+      <div class="search-results" id="searchResults"></div>
+    </div>
+    <label class="btn btn-ghost" style="cursor:pointer">
+      ＋ 添加文档
+      <input type="file" multiple accept=".pdf" style="display:none" onchange="uploadFiles(this)">
+    </label>
+  </div>
+</header>
+
+<div class="container">
+  <!-- 左侧统计 -->
+  <div class="glass-panel left-panel">
+    <div id="processingBanner" style="display:none" class="processing-banner">⚙️ 正在提取实体与关系，请稍候...</div>
+    <div class="panel-title">图谱概览</div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-val" id="sEnt">—</div><div class="stat-lbl">实体</div></div>
+      <div class="stat-card"><div class="stat-val" id="sRel">—</div><div class="stat-lbl">关系</div></div>
+      <div class="stat-card"><div class="stat-val" id="sDoc">—</div><div class="stat-lbl">文献</div></div>
+      <div class="stat-card"><div class="stat-val" id="sType" style="font-size:1rem">—</div><div class="stat-lbl">类型</div></div>
+    </div>
+    <div class="panel-title">实体分布</div>
+    <div id="legendList"></div>
+    <div style="margin-top:auto;padding-top:1rem">
+      <div class="panel-title">操作说明</div>
+      <div style="font-size:.77rem;color:var(--muted);line-height:1.8">
+        <p>• 滚轮缩放 / 拖拽平移</p>
+        <p>• 点击节点查看详情</p>
+        <p>• 双击节点展开子图</p>
+        <p>• 搜索框快速定位</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 中间图谱 -->
+  <div class="glass-panel center-panel">
+    <div id="graph-container"></div>
+    <div class="status-bar" id="statusBar">全局视图</div>
+    <div class="zoom-panel">
+      <button class="z-btn" onclick="zoom(1.25)">+</button>
+      <button class="z-btn" onclick="zoom(0.8)">−</button>
+    </div>
+    <div class="graph-controls">
+      <button class="ctrl-btn active" id="btnGlobal" onclick="loadGlobal()">全局</button>
+      <button class="ctrl-btn" id="btnLocal" style="display:none" onclick="loadGlobal()">返回全局</button>
+    </div>
+  </div>
+
+  <!-- 右侧详情 -->
+  <div class="glass-panel right-panel">
+    <div class="panel-title">实体详情</div>
+    <div id="entityDetail"><div class="placeholder">点击图中节点<br>查看实体详情与关系</div></div>
+  </div>
+</div>
+
+<div id="loading"><div class="spinner"></div><div class="loading-text">正在加载图谱...</div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── 从 URL 拿 graph_id
+const GRAPH_ID = location.pathname.split('/graph/')[1];
+const API = (path) => `/api/graphs/${GRAPH_ID}${path}`;
+
+let chart = null, typeColors = {}, pollTimer = null;
+
+// ─── 初始化
+async function init() {
+  // 加载图谱元信息
+  const meta = await fetch(API('')).then(r=>r.json());
+  document.getElementById('graphNameHeader').textContent = meta.name;
+  document.title = meta.name + ' — KG Studio';
+
+  // 处理中轮询
+  if (meta.status === 'processing') {
+    document.getElementById('processingBanner').style.display = 'flex';
+    pollMeta();
+  }
+
+  // 初始化图表
+  const dom = document.getElementById('graph-container');
+  chart = echarts.init(dom, 'dark');
+  window.addEventListener('resize', () => chart.resize());
+  chart.on('click', params => {
+    if (params.dataType === 'node') {
+      loadEntityDetail(params.data.id);
+      loadLocal(params.data.id);
+    }
+  });
+
+  // 加载统计 + 图谱
+  if (meta.status === 'ready') await loadStats();
+  await loadGlobal();
+  hideLoading();
+}
+
+async function pollMeta() {
+  const meta = await fetch(API('')).then(r=>r.json()).catch(()=>null);
+  if (!meta) return;
+  if (meta.status !== 'processing') {
+    document.getElementById('processingBanner').style.display = 'none';
+    await loadStats();
+    await loadGlobal();
+  } else {
+    pollTimer = setTimeout(pollMeta, 5000);
+  }
+}
+
+// ─── 统计
+async function loadStats() {
+  const d = await fetch(API('/stats')).then(r=>r.json());
+  document.getElementById('sEnt').textContent = d.entities.toLocaleString();
+  document.getElementById('sRel').textContent = d.relations.toLocaleString();
+  document.getElementById('sDoc').textContent = d.documents;
+  document.getElementById('sType').textContent = Object.keys(d.entity_type_distribution).length;
+  typeColors = d.type_colors;
+
+  const ll = document.getElementById('legendList');
+  ll.innerHTML = Object.entries(d.entity_type_distribution)
+    .sort((a,b)=>b[1]-a[1])
+    .map(([type,cnt]) => {
+      const c = typeColors[type] || '#fff';
+      return `<div class="legend-item" data-type="${type}" onclick="toggleType(this,'${type}')">
+        <div class="legend-dot" style="background:${c};box-shadow:0 0 5px ${c}"></div>
+        <span>${type}</span>
+        <span class="legend-cnt">${cnt}</span>
+      </div>`;
+    }).join('');
+}
+
+// ─── 图例切换
+function toggleType(el, type) {
+  el.classList.toggle('off');
+  const hidden = [...document.querySelectorAll('.legend-item.off')].map(e=>e.dataset.type);
+  const opt = chart.getOption();
+  if (!opt || !opt.legend) return;
+  const sel = {};
+  Object.keys(typeColors).forEach(t => sel[t] = !hidden.includes(t));
+  chart.setOption({ legend: [{ selected: sel }] });
+}
+
+// ─── 渲染图谱
+function renderGraph(nodes, edges, mode='global') {
+  const cats = Object.keys(typeColors).map(t=>({name:t,itemStyle:{color:typeColors[t]}}));
+  const sel = {};
+  document.querySelectorAll('.legend-item.off').forEach(e => sel[e.dataset.type] = false);
+  Object.keys(typeColors).forEach(t => { if(!(t in sel)) sel[t]=true; });
+
+  chart.setOption({
+    backgroundColor:'transparent',
+    legend:[{show:false,data:cats.map(c=>c.name),selected:sel}],
+    tooltip:{formatter:p => p.dataType==='node'
+      ? `<b>${p.data.name}</b><br/><span style="font-size:11px;color:#aaa">${p.data.value}</span>`
+      : ''},
+    series:[{
+      type:'graph', layout:'force',
+      nodes, edges:edges.map(e=>({...e,emphasis:{disabled:true},select:{disabled:true}})),
+      categories:cats, roam:true,
+      label:{position:'right',formatter:'{b}',color:'rgba(255,255,255,0.9)',textBorderColor:'#000',textBorderWidth:2},
+      force:{repulsion: mode==='global'?800:400, edgeLength: mode==='global'?[60,200]:[80,150], gravity:0.1, friction:0.5},
+      edgeSymbol:['none','arrow'], edgeSymbolSize:[3,6],
+      lineStyle:{color:'source',curveness:0.2,opacity:0.15},
+      emphasis:{focus:'adjacency',lineStyle:{width:3,opacity:1}}
+    }]
+  });
+  document.getElementById('statusBar').textContent =
+    mode==='global' ? `全局视图  ${nodes.length} 节点 / ${edges.length} 边` : `局部视图  ${nodes.length} 节点`;
+}
+
+// ─── 全局图
+async function loadGlobal() {
+  showLoading('加载全局图谱...');
+  document.getElementById('btnGlobal').classList.add('active');
+  document.getElementById('btnLocal').style.display = 'none';
+  try {
+    const d = await fetch(API('/overview')).then(r=>r.json());
+    typeColors = d.type_colors || typeColors;
+    renderGraph(d.nodes, d.edges, 'global');
+  } finally { hideLoading(); }
+}
+
+// ─── 局部子图
+async function loadLocal(entityId) {
+  showLoading('展开子图...');
+  document.getElementById('btnLocal').style.display = 'block';
+  document.getElementById('btnGlobal').classList.remove('active');
+  try {
+    const d = await fetch(API(`/subgraph/${encodeURIComponent(entityId)}`)).then(r=>r.json());
+    renderGraph(d.nodes, d.edges, 'local');
+  } finally { hideLoading(); }
+}
+
+// ─── 实体详情
+async function loadEntityDetail(id) {
+  const el = document.getElementById('entityDetail');
+  el.innerHTML = '<div class="placeholder">加载中...</div>';
+  const d = await fetch(API(`/entity/${encodeURIComponent(id)}`)).then(r=>r.json());
+  const e = d.entity;
+  let html = `<div style="margin-bottom:1rem">
+    <div class="entity-name">${e.name}</div>
+    <div class="entity-type" style="color:${d.color};border:1px solid ${d.color}">${e.entity_type}</div>
+  </div>`;
+  if (e.source_doc) html += `<div class="section"><h4>来源</h4><div style="font-size:.78rem;color:var(--muted);word-break:break-all">${e.source_doc}</div></div>`;
+
+  const mkRels = (list, dir) => list.length ? `<div class="section"><h4>${dir} (${list.length})</h4>
+    ${list.map(r=>`<div class="rel-item" onclick="loadEntityDetail('${dir==='出边'?r.target:r.source}');loadLocal('${dir==='出边'?r.target:r.source}')">
+      <div class="rel-label">${r.relation}</div>
+      <div>${dir==='出边'?r.target_name:r.source_name}</div>
+      ${r.evidence?`<div class="rel-evidence">${r.evidence}</div>`:''}
+    </div>`).join('')}
+  </div>` : '';
+
+  html += mkRels(d.out_relations, '出边') + mkRels(d.in_relations, '入边');
+  el.innerHTML = html;
+}
+
+// ─── 搜索
+let searchTimer;
+async function onSearch(q) {
+  clearTimeout(searchTimer);
+  if (!q.trim()) { hideResults(); return; }
+  searchTimer = setTimeout(async () => {
+    const list = await fetch(API(`/search?q=${encodeURIComponent(q)}`)).then(r=>r.json());
+    const el = document.getElementById('searchResults');
+    el.innerHTML = list.slice(0,20).map(n=>`
+      <div class="s-item" onclick="loadEntityDetail('${n.id}');loadLocal('${n.id}');hideResults()">
+        <span>${n.name}</span>
+        <span class="s-badge">${n.entity_type}</span>
+      </div>`).join('') || '<div style="padding:.8rem;color:var(--muted);font-size:.82rem">无结果</div>';
+    el.classList.add('open');
+  }, 250);
+}
+function showResults() { if(document.getElementById('searchInput').value) document.getElementById('searchResults').classList.add('open'); }
+function hideResults() { document.getElementById('searchResults').classList.remove('open'); }
+
+// ─── 上传文件
+async function uploadFiles(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+  const fd = new FormData();
+  files.forEach(f => fd.append('files', f));
+  showToast(`正在上传 ${files.length} 个文件...`);
+  const r = await fetch(API('/upload'), {method:'POST',body:fd});
+  if (r.ok) {
+    showToast('上传成功，正在后台处理文档', 'ok');
+    document.getElementById('processingBanner').style.display = 'flex';
+    pollMeta();
+  } else showToast('上传失败', 'err');
+  input.value = '';
+}
+
+// ─── Zoom
+function zoom(factor) {
+  const opt = chart.getOption();
+  chart.dispatchAction({type: factor>1 ? 'dataZoom' : 'dataZoom'});
+  // ECharts force 布局通过 setOption zoom
+  chart.setOption({series:[{zoom: (opt.series?.[0]?.zoom || 1) * factor}]});
+}
+
+// ─── Loading
+function showLoading(txt) {
+  document.getElementById('loading').style.display = 'flex';
+  document.querySelector('.loading-text').textContent = txt || '加载中...';
+}
+function hideLoading() { document.getElementById('loading').style.display = 'none'; }
+
+// ─── Toast
+function showToast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(()=>t.classList.remove('show'), 3000);
+}
+
+init();
+</script>
+</body>
+</html>

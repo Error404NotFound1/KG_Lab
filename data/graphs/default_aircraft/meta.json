@@ -1,0 +1,12 @@
+{
+  "id": "default_aircraft",
+  "name": "变构飞行器知识图谱",
+  "description": "基于国防科技文献自动抽取的变构/变体飞行器领域知识图谱",
+  "status": "ready",
+  "entity_count": 1881,
+  "relation_count": 11342,
+  "doc_count": 3,
+  "created_at": "2026-04-15T13:00:00+00:00",
+  "updated_at": "2026-05-11T13:09:16.051811+00:00",
+  "error": null
+}

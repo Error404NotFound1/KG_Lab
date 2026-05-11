@@ -214,7 +214,9 @@ def extract_terms(corpus_dir: str | Path | None = None, out_path: str | Path | N
         freq, tfidf, pmi = corpus_counter[term], tfidf_scores.get(term, 0.0), pmi_scores.get(term, 0.0)
         rows.append({"term": term, "freq": freq, "tfidf": round(tfidf, 6), "pmi": round(pmi, 6), "score": round(freq * 0.6 + tfidf * 0.3 + max(pmi, 0) * 0.1, 6), "entity_type": infer_entity_type(term), "keep": "Y", "alias": ""})
     rows.sort(key=lambda row: (-float(row["score"]), -int(row["freq"]), row["term"]))
-    raw_path = Path(out_path) if out_path else TERMS_DIR / "terms_raw.csv"; clean_path, alias_path = TERMS_DIR / "terms_clean.csv", TERMS_DIR / "alias.csv"
+    raw_path = Path(out_path) if out_path else TERMS_DIR / "terms_raw.csv"
+    clean_path = raw_path.parent / "terms_clean.csv"
+    alias_path = raw_path.parent / "alias.csv"
     metadata_path, sentences_path = export_metadata(files), export_sentences(files)
     write_terms_csv(rows, raw_path); write_terms_csv(rows[: min(len(rows), DEFAULT_MAX_OUTPUT_TERMS)], clean_path)
     if not alias_path.exists():

@@ -28,7 +28,9 @@ def load_terms(term_file: str | Path | None = None) -> list[dict]:
             path = TERMS_DIR / "terms_clean.csv"
 
     if not path.exists():
-        raise FileNotFoundError(f"术语文件不存在: {path}")
+        import logging
+        logging.getLogger(__name__).warning("术语文件不存在，跳过词典匹配: %s", path)
+        return []
     import csv
 
     terms = []
@@ -212,7 +214,7 @@ def predict_corpus(
     """返回 (raw_path, clean_path)。"""
     ENTITIES_DIR.mkdir(parents=True, exist_ok=True)
     raw_target = Path(out_path) if out_path else ENTITIES_DIR / "entities_raw.jsonl"
-    clean_target = ENTITIES_DIR / "entities_clean.jsonl"
+    clean_target = raw_target.parent / "entities_clean.jsonl"
 
     sentences = load_sentences(sentences_path)
     with open(raw_target, "w", encoding="utf-8") as f:
@@ -221,10 +223,10 @@ def predict_corpus(
             entities = predict_ner(sentence, term_file=term_file)
             for entity in entities:
                 payload = {
-                    "doc_id": record["doc_id"],
-                    "title": record["title"],
-                    "file_name": record["file_name"],
-                    "sentence_id": record["sentence_id"],
+                    "doc_id": record.get("doc_id", "unknown"),
+                    "title": record.get("title", ""),
+                    "file_name": record.get("file_name", ""),
+                    "sentence_id": record.get("sentence_id", 0),
                     "text": sentence,
                     "entity": entity["entity"],
                     "entity_type": entity["entity_type"],
@@ -234,7 +236,7 @@ def predict_corpus(
                 }
                 f.write(json.dumps(payload, ensure_ascii=False) + "\n")
 
-    type_map = _load_type_map()
+    type_map = _load_type_map(term_file)
     clean_count = clean_entities(raw_target, clean_target, type_map)
     print(f"[ner] raw 实体: 见 {raw_target}")
     print(f"[ner] clean 实体: {clean_count} 条（去重 + 过滤后）")
