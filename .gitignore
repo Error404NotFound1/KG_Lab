@@ -7,9 +7,32 @@ models/
 .pytest_cache/
 .mypy_cache/
 .DS_Store
-知识图谱构建数据集/*.pdf
-*.pdf 
 *.DS_*
+
+# 数据集与原始文献
+知识图谱构建数据集/*.pdf
+
+# LaTeX / PDF 产物
+*.pdf
+!report/report.pdf
+report/*.aux
+report/*.out
+report/*.toc
+report/*.fls
+report/*.fdb_latexmk
+report/*.synctex.gz
+report/*.lof
+report/*.lot
+report/*.bcf
+report/*.run.xml
+report/*.blg
+report/*.bbl
+report/*.xdv
+
+# Python / notebook / editor cache
+.ipynb_checkpoints/
+.vscode/
+.idea/
 
 # 忽略庞大的原始数据和中间提取结果
 data/entities/*_raw.*
