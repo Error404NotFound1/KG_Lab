@@ -1,7 +1,7 @@
 {
   "ocr": {
-    "api_key": "sk-ncDpv1SqSbWaryblvU9suBOhrh6iWjDVOs6dbsymlAEbII1Y",
-    "base_url": "https://yunwu.ai/v1",
+    "api_key": "YOUR_API_KEY_HERE",
+    "base_url": "",
     "model": "gpt-5.4-nano",
     "timeout": 120,
     "max_tokens": 4096,
@@ -13,8 +13,8 @@
   },
   "term_cleaning": {
     "enabled": true,
-    "api_key": "sk-ncDpv1SqSbWaryblvU9suBOhrh6iWjDVOs6dbsymlAEbII1Y",
-    "base_url": "https://yunwu.ai/v1",
+    "api_key": "YOUR_API_KEY_HERE",
+    "base_url": "",
     "model": "gpt-5.4-nano",
     "timeout": 120,
     "max_tokens": 4096,

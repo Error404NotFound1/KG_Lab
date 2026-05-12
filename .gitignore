@@ -1,20 +1,23 @@
-.venv/
-__pycache__/
-*.pyc
-models/
-.env
-*.log
-.pytest_cache/
-.mypy_cache/
+# === 系统与编辑器缓存 ===
 .DS_Store
 *.DS_*
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
 
-# 数据集与原始文献
-知识图谱构建数据集/*.pdf
+# === 环境与配置 ===
+.venv/
+venv/
+.env
+config.json
+!config.json.template
 
-# LaTeX / PDF 产物
-*.pdf
-!report/report.pdf
+# === 日志与产物 ===
+*.log
 report/*.aux
 report/*.out
 report/*.toc
@@ -29,13 +32,17 @@ report/*.blg
 report/*.bbl
 report/*.xdv
 
-# Python / notebook / editor cache
-.ipynb_checkpoints/
-.vscode/
-.idea/
+# 允许提交最终报告 PDF，忽略其他 PDF
+*.pdf
+!report/report.pdf
 
-# 忽略庞大的原始数据和中间提取结果
-data/entities/*_raw.*
-data/relations/*_raw.*
-data/terminology/*_raw.*
-data/text/
+# === 数据忽略规则 ===
+# 忽略所有运行产生的数据
+data/
+# 但保留金标准和最终图谱 demo
+!data/annotation/
+!data/kg/
+!data/kg/kg.json
+
+# 忽略原始数据集
+知识图谱构建数据集/

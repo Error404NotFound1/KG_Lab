@@ -3,10 +3,10 @@
   "name": "得",
   "description": "",
   "status": "ready",
-  "entity_count": 188,
-  "relation_count": 927,
-  "doc_count": 2,
+  "entity_count": 372,
+  "relation_count": 1219,
+  "doc_count": 3,
   "created_at": "2026-05-11T16:56:22.335013+00:00",
-  "updated_at": "2026-05-11T17:19:50.602287+00:00",
+  "updated_at": "2026-05-12T01:44:45.619669+00:00",
   "error": null
 }
