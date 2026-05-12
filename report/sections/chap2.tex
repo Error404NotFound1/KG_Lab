@@ -1,12 +1,35 @@
 \section{数据源与信息获取}
 \subsection{领域数据源梳理}
-本项目的知识来源以变构飞行器领域中文文献为主，涵盖航空航天专著、结构设计资料、飞行控制文献、气动分析文献和综述性材料。数据形态以 PDF 为主，同时存在少量扫描页、编码异常页及纯文本中间语料。项目通过 \texttt{documents.csv} 管理文档元数据，通过 \texttt{data/text\_ascii/} 与 \texttt{data/processed/sentences.jsonl} 统一管理预处理结果，从而保证后续各阶段输入的一致性和可复用性。
+本项目的知识来源以变构飞行器领域中文文献为主，数据形态以 PDF 为主。项目通过 \texttt{documents.csv} 管理元数据，并利用 \texttt{sentences.jsonl} 统一预处理结果。根据来源功能与知识贡献，本项目对数据源进行了如下梳理：
 
-从来源功能上看，不同类型文献在知识图谱构建中的作用并不相同。专著适合提供较稳定的概念定义、分类体系和组成结构信息；研究论文更容易提供新方法、新参数关系和实验结论；综述文献则适合抽取领域术语、研究热点和跨文献的概念对应关系。因此，在进行数据源梳理时，项目并未将所有文献等价处理，而是从知识贡献角度理解其价值。换言之，数据源不仅是算法输入，更直接影响后续实体类型设计、关系模式覆盖范围以及图谱最终的知识密度。
+\begin{itemize}[leftmargin=2em]
+    \item \textbf{专著类资料}：如结构设计手册。主要用于提供稳定的概念定义、分类体系及层级化的组成结构信息。
+    \item \textbf{期刊论文}：涵盖飞行控制、气动分析等方向。主要贡献为新算法、新参数影响关系以及实验验证结论。
+    \item \textbf{综述性文献}：用于归纳领域术语体系、识别研究热点及跨文献的概念对应关系。
+\end{itemize}
 
-从知识结构看，专著更适合提供系统性的概念层次与结构组成知识，期刊论文更适合提供参数影响、控制方法和性能分析关系，综述文献则有助于归纳领域术语体系与主要研究方向。因此，数据源梳理不仅是语料准备过程，也是后续本体设计和关系模式抽取的重要基础。
+原始文献在格式层面存在显著差异（如扫描页、乱码、页眉页脚噪声等）。本阶段的核心工作在于将“文档读取”提升为“文档治理”，通过标准化的预处理流水线为后续抽取提供稳定的句子级语料基础。
 
-此外，原始文献在格式层面差异较大。部分 PDF 具有清晰的文本层，适合直接抽取；部分资料为扫描型页面，需要 OCR 识别；还有一些文献虽然可抽出文本，但存在严重断行、乱码、页眉页脚干扰和图表内容混入等问题。这意味着领域知识获取不能简单理解为“读取 PDF 文本”，而应被视为一项涵盖文档治理、质量控制与中间结果标准化的前处理工程。正因为本项目在数据源阶段对这些问题进行了专门设计，后续术语抽取和实体关系抽取才能获得相对稳定的输入基础。
+为了体现本项目的数据处理规模与工程量，表~\ref{tab:data-stats} 展示了数据获取阶段的各项统计指标。通过对 14 篇高价值领域文献的深度处理，系统最终生成了万级规模的句子语料和关系记录，为后续构建高质量图谱提供了坚实基础。
+
+\begin{table}[H]
+\centering
+\caption{数据获取与初步处理统计表}
+\label{tab:data-stats}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{lc}
+\toprule
+\textbf{统计项} & \textbf{统计数量} \\
+\midrule
+原始领域文献 (PDF) & 14 篇 \\
+处理后有效句子总数 (sentences) & 10,702 句 \\
+生成候选术语总数 (raw terms) & 167,845 条 \\
+精筛后实体概念数 (clean entities) & 3,000 条 \\
+最终关系记录数 (clean relations) & 11,342 条 \\
+人工构建金标准三元组 & 1,200 条 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 \subsection{关键信息获取方法}
 \subsubsection{面向 PDF 文献的文本提取方法}
@@ -26,11 +49,19 @@ T^*(d)=\begin{cases}T_1(d), & q_1\ge\tau \\ T_2(d), & q_1<\tau,\ q_2\ge\tau \\ T
 \label{fig:preprocess}
 \end{figure}
 
+
 \begin{lstlisting}[style=pythonstyle,caption={PDF 文本抽取核心策略示意}]
-# preprocess/extract.py
-# 1. PyMuPDF 纯文本提取
-# 2. pdfminer.six 回退解析
-# 3. 视觉模型 OCR 兜底
+def extract_content(pdf_path):
+    # 1. 尝试 PyMuPDF 高速纯文本提取
+    text = fitz_extract(pdf_path)
+    if is_valid(text): return text
+
+    # 2. 回退至 pdfminer.six 进行细粒度解析 (解决乱码/文本层异常)
+    text = pdfminer_extract(pdf_path)
+    if is_valid(text): return text
+
+    # 3. 最终由视觉模型 OCR 强制兜底 (处理扫描件/图片页)
+    return ocr_backend_extract(pdf_path)
 \end{lstlisting}
 
 \subsubsection{基于术语与规则融合的数据预处理方法}
@@ -53,10 +84,20 @@ S=f_{\mathrm{clean}}(X)=\{s_1,s_2,\ldots,s_m\}
 
 为了增强系统的领域泛化能力，我们对大模型的系统 Prompt 进行了拓展，将其适用范围从单一的“航空航天”扩展至“通用机械与工程（含汽车、液压等）”领域，有效避免了非航天专业文献中通用工程术语被错误过滤的问题。此外，系统还实现了基于 LLM 的增量词典融合与审核机制：在多文档并发上传的场景下，系统会自动读取已有的术语金标准，并与新文档抽取的术语进行去重与融合，从根本上解决了多次上传导致旧图谱内容被覆盖的增量构建难题。
 
+
 \begin{lstlisting}[style=pythonstyle,caption={候选术语生成示意}]
 def generate_candidate_terms(tokens, max_ngram=4):
     counter = Counter()
-    ...
+    # 过滤停用词并保留有效 Token
+    filtered = [t for t in tokens if valid_token(t)]
+
+    # 滑动窗口生成 n-gram 候选 (1至4gram)
+    for n in range(1, max_ngram + 1):
+        for idx in range(0, len(filtered) - n + 1):
+            term = "".join(filtered[idx: idx + n])
+            # 二次噪声过滤与词长校验
+            if 2 <= len(term) <= 24 and not is_noise_term(term):
+                counter[term] += 1
     return counter
 \end{lstlisting}
 

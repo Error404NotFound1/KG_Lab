@@ -6,6 +6,19 @@
 
 同时，该架构兼顾了课程项目场景下的展示需求与技术扩展性。一方面，当前系统可直接依赖本地文件运行，无需预先搭建复杂数据库环境，降低了部署门槛；另一方面，图谱层保留 JSON、CSV 与 TTL 等标准导出格式，为后续接入图数据库、RDF 推理框架或问答系统提供了接口基础。因此，这一总体架构既满足了原型系统快速实现的现实要求，也为未来扩展留出了清晰空间。
 
+\begin{figure}[H]\centering
+\includegraphics[width=1\textwidth]{figures/系统总体架构图.png}
+\caption{知识图谱构建与可视化系统总体架构图}
+\label{fig:total-arch}
+\end{figure}
+
+\begin{figure}[H]\centering
+\includegraphics[width=1\textwidth]{figures/项目实施技术路线图.png}
+\caption{项目实施技术路线图}
+\label{fig:roadmap}
+\end{figure}
+
+
 \subsection{实体抽取与关系抽取实现}
 实体识别以 \texttt{terms\_final.csv} 为词典基础，辅以规则识别部分参数类与结构类实体。关系抽取则采用“同句实体对—触发词匹配—约束过滤—三元组输出”的流程。项目引入触发词位置约束、实体黑名单、距离阈值和实体类型约束四重过滤机制，显著提高了关系抽取的精度。
 
@@ -43,6 +56,24 @@ MAX_ENTITY_DISTANCE = 80
 在后端实现上，系统将图谱统计、搜索、节点详情和中心子图等功能封装为独立接口，从而使前端页面逻辑与底层数据组织方式解耦。这样做的好处在于：一方面可以让前端专注于交互与展示，另一方面也便于后续将文件型图谱替换为数据库型图谱而不必完全重写前端逻辑。在前端实现上，力导向图被用作主要展示形式，是因为它更适合呈现实体之间的聚类关系、中心节点和局部连接强度，有助于用户从视觉上快速把握图谱结构。
 
 此外，系统在可视化层面并非仅追求“好看”，而是尽量服务于知识探索任务。实体搜索帮助用户快速定位目标概念；类型筛选帮助用户隔离不同语义层次的节点；实体详情面板帮助用户查看节点属性与关联边；局部子图则帮助用户以某个中心实体为起点展开邻域分析。在交互体验优化方面，前端重构了关键操作的确认逻辑，通过自定义异步 Modal 对话框替换了原生 \texttt{window.confirm}，彻底解决了大规模并行构建任务中浏览器 UI 线程被阻塞的缺陷。通过这些功能，图谱由静态结果图转化为流畅可交互的知识组织界面，这也是本项目的重要实现特点之一。
+
+系统的交互流程从项目管理开始。图~\ref{fig:home-ui} 展示了系统的前端首页，用户可以在此查看已构建的图谱列表并进入特定的分析任务。图~\ref{fig:create-ui} 和 图~\ref{fig:upload-ui} 分别展示了新建图谱任务和添加文献文档的交互界面。这些界面通过响应式设计保证了操作的直观性，并提供了即时的进度反馈与错误提示。
+
+\begin{figure}[H]\centering
+\includegraphics[width=0.8\textwidth]{figures/前端首页.png}
+\caption{系统项目管理首页}
+\label{fig:home-ui}
+\end{figure}
+\begin{figure}[H]\centering
+\includegraphics[width=0.8\textwidth]{figures/新建图谱界面截图.png}
+\caption{新建图谱任务界面}
+\label{fig:create-ui}
+\end{figure}
+\begin{figure}[H]\centering
+\includegraphics[width=0.8\textwidth]{figures/添加文档功能截图.png}
+\caption{添加文献文档界面}
+\label{fig:upload-ui}
+\end{figure}
 
 图~\ref{fig:main-ui} 展示了系统主界面。该界面主要用于呈现知识图谱整体分布、节点聚类状态以及全局交互效果，是用户进入系统后最先接触到的总览页面。通过主界面，用户可以先形成对图谱规模、结构和热点实体的整体认识，再进一步进行局部探索。
 
